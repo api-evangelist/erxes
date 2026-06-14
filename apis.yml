@@ -1,0 +1,54 @@
+aid: erxes
+name: Erxes
+description: "Open-source experience operating system (XOS) that unifies marketing, sales, operations, and support — replacing tools like HubSpot, Zendesk, and Linear. Provides a GraphQL API covering contacts, companies, conversations, tasks, tickets, deals, team inboxes, and automation workflows."
+type: Index
+image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+url: https://erxes.io
+baseURL: https://erxes.io
+created: 2026-06-14
+modified: 2026-06-14
+specificationVersion: '0.19'
+tags:
+  - GraphQL
+  - CRM
+  - Customer Experience
+  - Open Source
+  - Marketing Automation
+  - Sales Pipeline
+apis:
+  - aid: erxes:graphql-api
+    name: Erxes GraphQL API
+    description: "GraphQL Federation API powering the Erxes XOS platform. Built on Apollo Router with microservices architecture, it exposes endpoints for contacts, companies, conversations, tickets, tasks, deals, automations, pipelines, and team inboxes. The API Gateway runs on port 4000 in self-hosted deployments."
+    tags:
+      - GraphQL
+      - CRM
+      - Contacts
+      - Conversations
+      - Automation
+    humanURL: https://erxes.io/docs/introduction
+    baseURL: https://erxes.io
+    properties:
+      - url: https://erxes.io/docs/introduction
+        type: Documentation
+      - url: graphql/erxes-graphql.md
+        type: GraphQL
+common:
+  - url: https://erxes.io
+    type: Website
+  - url: https://erxes.io/docs/introduction
+    type: Documentation
+  - url: https://www.linkedin.com/company/erxes
+    type: LinkedIn
+  - url: https://github.com/erxes
+    type: GitHubOrganization
+  - url: https://erxes.io/pricing/self-service/frontline
+    type: Pricing
+  - url: plans/erxes-plans.md
+    type: Plans
+  - url: rate-limits/erxes-rate-limits.md
+    type: RateLimits
+  - url: finops/erxes-finops.md
+    type: FinOps
+maintainers:
+  - FN: Kin Lane
+    email: kin@apievangelist.com
