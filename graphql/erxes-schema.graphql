@@ -1,0 +1,1798 @@
+# Erxes GraphQL Schema
+# Source: https://github.com/erxes/erxes (monorepo — backend/core-api and backend/plugins)
+# Architecture: Apollo Federation v2 — each plugin is a subgraph federated at port 4000.
+# Scalar and directive definitions cover the full platform surface.
+
+scalar Date
+scalar JSON
+
+directive @key(fields: String!) on OBJECT | INTERFACE
+directive @external on FIELD_DEFINITION
+directive @requires(fields: String!) on FIELD_DEFINITION
+directive @provides(fields: String!) on FIELD_DEFINITION
+directive @cacheControl(maxAge: Int) on OBJECT | FIELD_DEFINITION
+
+# ─── Shared / Common ────────────────────────────────────────────────────────
+
+type PageInfo {
+  hasNextPage: Boolean
+  hasPreviousPage: Boolean
+  startCursor: String
+  endCursor: String
+}
+
+type Attachment {
+  url: String
+  name: String
+  type: String
+  size: Float
+  duration: Float
+}
+
+type PdfAttachment {
+  url: String
+  name: String
+}
+
+input AttachmentInput {
+  url: String!
+  name: String!
+  type: String
+  size: Float
+  duration: Float
+}
+
+enum CURSOR_DIRECTION {
+  BEFORE
+  AFTER
+}
+
+enum CURSOR_MODE {
+  INDEX
+  TIMESTAMP
+}
+
+enum CONTACT_STATUS {
+  Active
+  Deleted
+}
+
+# ─── User / Team Member ─────────────────────────────────────────────────────
+
+type UserDetailsType {
+  avatar: String
+  coverPhoto: String
+  fullName: String
+  shortName: String
+  birthDate: Date
+  position: String
+  workStartedDate: Date
+  location: String
+  description: String
+  operatorPhone: String
+  firstName: String
+  middleName: String
+  lastName: String
+  employeeId: String
+}
+
+input UserDetails {
+  avatar: String
+  coverPhoto: String
+  fullName: String
+  shortName: String
+  birthDate: Date
+  position: String
+  workStartedDate: Date
+  location: String
+  description: String
+  operatorPhone: String
+  firstName: String
+  middleName: String
+  lastName: String
+  employeeId: String
+}
+
+input EmailSignature {
+  brandId: String
+  signature: String
+}
+
+input InvitationEntry {
+  email: String
+  password: String
+  permissionGroupIds: [String!]
+}
+
+enum UserChatStatus {
+  offline
+  online
+}
+
+type CookieOrganization {
+  subdomain: String
+  name: String
+}
+
+type Organization {
+  name: String
+  icon: String
+  subdomain: String
+  promoCodes: [String]
+  isPaid: Boolean
+  expiryDate: Date
+  plan: String
+  purchased: Int
+  isWhiteLabel: Boolean
+  setupService: JSON
+  onboardedPlugins: [String]
+  contactRemaining: Boolean
+  experienceName: String
+  experience: JSON
+  bundleNames: [String]
+  charge: JSON
+  createdAt: Date
+  category: String
+}
+
+type User @key(fields: "_id") @cacheControl(maxAge: 3) {
+  _id: String
+  createdAt: Date
+  username: String
+  email: String
+  isActive: Boolean
+  details: UserDetailsType
+  links: JSON
+  departments: [Department]
+  branchIds: [String]
+  branches: [Branch]
+  positionIds: [String]
+  positions: [Position]
+  unitId: String
+  score: Float
+  leaderBoardPosition: Int
+  employeeId: String
+  isOnboarded: Boolean
+  cursor: String
+}
+
+type UserMovement {
+  _id: String
+  createdAt: Date
+  createdBy: String
+  createdByDetail: JSON
+  userId: String
+  userDetail: JSON
+  contentType: String
+  contentTypeId: String
+  contentTypeDetail: JSON
+  status: String
+}
+
+type UsersListResponse {
+  list: [User]
+  totalCount: Int
+  pageInfo: PageInfo
+}
+
+# ─── Organization Structure ──────────────────────────────────────────────────
+
+type Branch @key(fields: "_id") {
+  _id: String!
+  title: String
+  address: String
+  parentId: String
+  supervisorId: String
+  code: String
+  order: String
+  userIds: [String]
+  users: [User]
+  parent: Branch
+  supervisors: [User]
+}
+
+type Department @key(fields: "_id") {
+  _id: String!
+  title: String
+  description: String
+  parentId: String
+  supervisorId: String
+  code: String
+  order: String
+  userIds: [String]
+  users: [User]
+  parent: Department
+  supervisors: [User]
+}
+
+type Position @key(fields: "_id") {
+  _id: String!
+  title: String
+  parentId: String
+  code: String
+  order: String
+  userIds: [String]
+  users: [User]
+}
+
+# ─── Contacts: Customer ──────────────────────────────────────────────────────
+
+enum CUSTOMER_RELATION_TYPE {
+  TAG
+  BRAND
+}
+
+type Customer @key(fields: "_id") @cacheControl(maxAge: 3) {
+  _id: String
+  state: String
+  createdAt: Date
+  updatedAt: Date
+  avatar: String
+  integrationId: String
+  firstName: String
+  lastName: String
+  middleName: String
+  birthDate: Date
+  sex: Int
+  email: String
+  primaryEmail: String
+  emails: [String]
+  primaryPhone: String
+  phones: [String]
+  primaryAddress: JSON
+  addresses: [JSON]
+  phone: String
+  tagIds: [String]
+  remoteAddress: String
+  location: JSON
+  visitorContactInfo: JSON
+  trackedData: JSON
+  propertiesData: JSON
+  ownerId: String
+  position: String
+  department: String
+  leadStatus: String
+  hasAuthority: String
+  description: String
+  isSubscribed: String
+  code: String
+  emailValidationStatus: String
+  phoneValidationStatus: String
+  status: String
+  isOnline: Boolean
+  lastSeenAt: Date
+  sessionCount: Int
+  urlVisits: [JSON]
+  owner: User
+  score: Float
+  links: JSON
+  companies: [Company]
+  getTags: [Tag]
+  cursor: String
+}
+
+type CustomersListResponse {
+  list: [Customer]
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+# ─── Contacts: Company ───────────────────────────────────────────────────────
+
+type Company @key(fields: "_id") @cacheControl(maxAge: 3) {
+  _id: String
+  createdAt: Date
+  updatedAt: Date
+  avatar: String
+  size: Int
+  website: String
+  industry: [String]
+  parentCompanyId: String
+  ownerId: String
+  mergedIds: [String]
+  names: [String]
+  primaryName: String
+  emails: [String]
+  primaryEmail: String
+  phones: [String]
+  primaryPhone: String
+  primaryAddress: JSON
+  addresses: [JSON]
+  status: String
+  businessType: String
+  description: String
+  isSubscribed: String
+  links: JSON
+  owner: User
+  parentCompany: Company
+  tagIds: [String]
+  trackedData: JSON
+  propertiesData: JSON
+  customers: [Customer]
+  getTags: [Tag]
+  code: String
+  location: String
+  score: Float
+  cursor: String
+}
+
+type CompaniesListResponse {
+  list: [Company]
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+# ─── Tags ────────────────────────────────────────────────────────────────────
+
+type Tag @key(fields: "_id") @cacheControl(maxAge: 3) {
+  _id: String
+  name: String
+  colorCode: String
+  parentId: String
+  relatedIds: [String]
+  isGroup: Boolean
+  description: String
+  type: String
+  order: String
+  objectCount: Int
+  totalObjectCount: Int
+  createdAt: Date
+}
+
+type TagsListResponse {
+  list: [Tag]
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+# ─── Segments ────────────────────────────────────────────────────────────────
+
+input EventAttributeFilter {
+  name: String
+  operator: String
+  value: String
+}
+
+input SubSegment {
+  _id: String
+  contentType: String
+  conditions: JSON
+  conditionsConjunction: String
+  config: JSON
+}
+
+input SegmentCondition {
+  type: String
+  propertyType: String
+  propertyName: String
+  propertyOperator: String
+  propertyValue: String
+  eventName: String
+  eventOccurrence: String
+  eventOccurenceValue: Float
+  eventAttributeFilters: [EventAttributeFilter]
+  subSegmentId: String
+  config: JSON
+}
+
+type Segment @key(fields: "_id") {
+  _id: String!
+  contentType: String!
+  name: String
+  description: String
+  subOf: String
+  color: String
+  conditions: JSON
+  conditionsConjunction: String
+  shouldWriteActivityLog: Boolean
+  getSubSegments: [Segment]
+  subSegmentConditions: [Segment]
+  config: JSON
+  count: Int
+}
+
+# ─── Auth ────────────────────────────────────────────────────────────────────
+
+type AuthTokenResponse {
+  tokenType: String!
+  accessToken: String!
+  refreshToken: String!
+  expiresIn: Int!
+  user: User
+}
+
+enum OAuthClientAppType {
+  public
+  confidential
+}
+
+enum OAuthClientAppStatus {
+  active
+  revoked
+}
+
+enum OAuthClientAccessTokenLifetime {
+  year
+  half
+  trio
+}
+
+type OAuthClientApp {
+  _id: String
+  name: String
+  logo: String
+  description: String
+  clientId: String
+  type: OAuthClientAppType
+  accessTokenLifetime: OAuthClientAccessTokenLifetime
+  redirectUrls: [String]
+  status: OAuthClientAppStatus
+  lastUsedAt: Date
+  createdAt: Date
+  updatedAt: Date
+  generatedSecret: String
+}
+
+# ─── Permissions ─────────────────────────────────────────────────────────────
+
+input PermissionInput {
+  plugin: String!
+  module: String!
+  actions: [String]!
+  scope: String!
+}
+
+type PermissionAction {
+  title: String
+  name: String!
+  description: String!
+  always: Boolean
+  disabled: Boolean
+}
+
+type PermissionScopeDescription {
+  name: String!
+  description: String!
+}
+
+type PermissionModule {
+  name: String!
+  description: String
+  scopes: [PermissionScopeDescription]
+  plugin: String!
+  scopeField: String
+  ownerFields: [String]
+  actions: [PermissionAction]!
+  always: Boolean
+}
+
+type PermissionModulesByPlugin {
+  plugin: String!
+  modules: [PermissionModule]!
+}
+
+type PermissionGroupPermission {
+  plugin: String!
+  module: String!
+  actions: [String]!
+  scope: String!
+}
+
+type DefaultPermissionGroup {
+  id: String!
+  name: String!
+  description: String
+  plugin: String!
+  permissions: [PermissionGroupPermission]!
+  members: [User]
+}
+
+type PermissionGroup {
+  _id: String!
+  name: String!
+  description: String
+  permissions: [PermissionGroupPermission]!
+  members: [User]
+  createdAt: Date
+  updatedAt: Date
+}
+
+type UserPermission {
+  plugin: String
+  module: String!
+  actions: [String]!
+  scope: String!
+}
+
+type CurrentUserPermissionsResult {
+  permissions: [UserPermission]!
+  pluginsWithPermissions: [String]!
+}
+
+type CustomPermission {
+  plugin: String!
+  module: String!
+  actions: [String]!
+  scope: String!
+}
+
+# ─── Notifications ───────────────────────────────────────────────────────────
+
+type NotificationModuleEvent {
+  name: String
+  title: String
+  description: String
+}
+
+type NotificationModule {
+  name: String
+  description: String
+  icon: String
+  events: [NotificationModuleEvent]
+}
+
+type NotificationPluginType {
+  pluginName: String
+  modules: [NotificationModule]
+}
+
+type NotificationConfig {
+  _id: String!
+  contentType: String!
+  action: String!
+  enabled: Boolean!
+  inAppEnabled: Boolean!
+  emailEnabled: Boolean!
+  emailTemplateId: String
+  emailSubject: String
+  expiresAfterDays: Int
+  createdAt: Date
+  updatedAt: Date
+  createdBy: String!
+}
+
+type EmailDelivery {
+  _id: String
+  notificationId: String
+  userId: String
+  email: String
+  subject: String
+  content: String
+  provider: String
+  messageId: String
+  status: String
+  sentAt: String
+  error: String
+  retryCount: Int
+  createdAt: String
+  updatedAt: String
+}
+
+type Notification {
+  _id: String
+  title: String
+  message: String
+  type: String
+  fromUserId: String
+  fromUser: User
+  contentType: String
+  contentTypeId: String
+  priority: String
+  metadata: JSON
+  createdAt: Date
+  isRead: Boolean
+  action: String
+  emailDelivery: EmailDelivery
+  kind: String
+  updatedAt: Date
+}
+
+type NotificationsList {
+  list: [Notification]
+  totalCount: Int
+  pageInfo: PageInfo
+}
+
+type NotificationSettings {
+  userId: String
+  channels: JSON
+  events: JSON
+  createdAt: String
+  updatedAt: String
+}
+
+enum NotificationPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum NotificationStatus {
+  READ
+  UNREAD
+  ALL
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
+
+input NotificationFilters {
+  status: NotificationStatus
+  priority: NotificationPriority
+  type: NotificationType
+  fromDate: String
+  endDate: String
+  fromUserId: String
+}
+
+input NotificationSettingsEventInput {
+  event: String
+  enabled: Boolean
+  channels: [String]
+}
+
+input NotificationSettingsChannelInput {
+  channel: String
+  enabled: Boolean
+  metadata: JSON
+}
+
+# ─── Automations ─────────────────────────────────────────────────────────────
+
+type Trigger {
+  id: String
+  type: String
+  style: JSON
+  config: JSON
+  icon: String
+  label: String
+  description: String
+  position: JSON
+  workflowId: String
+  actionId: String
+  isCustom: Boolean
+  count: Int
+}
+
+type Action {
+  id: String
+  type: String
+  style: JSON
+  config: JSON
+  icon: String
+  label: String
+  description: String
+  position: JSON
+  workflowId: String
+  nextActionId: String
+  targetActionId: String
+}
+
+type Workflow {
+  id: String
+  automationId: String
+  name: String
+  description: String
+  config: JSON
+  position: JSON
+}
+
+type Automation {
+  _id: String!
+  name: String
+  status: String
+  edgeType: String
+  flowDirection: String
+  createdAt: Date
+  updatedAt: Date
+  createdBy: String
+  updatedBy: String
+  tagIds: [String]
+  triggers: [Trigger]
+  actions: [Action]
+  workflows: [Workflow]
+  createdUser: User
+  updatedUser: User
+}
+
+type AutomationNote {
+  _id: String
+  description: String
+  triggerId: String
+  actionId: String
+  createdUser: User
+  createdAt: Date
+}
+
+type AutomationsListResponse {
+  list: [Automation]
+  totalCount: Float
+  pageInfo: PageInfo
+}
+
+type automationsTotalCountResponse {
+  total: Int
+  byStatus: Int
+}
+
+type AutomationHistory {
+  _id: String
+  createdAt: Date
+  modifiedAt: Date
+  automationId: String
+  triggerId: String
+  triggerType: String
+  triggerConfig: JSON
+  nextActionId: String
+  targetId: String
+  target: JSON
+  status: String
+  description: String
+  actions: [JSON]
+  startWaitingDate: Date
+  waitingActionId: String
+}
+
+type AutomationHistories {
+  list: [AutomationHistory]
+  totalCount: Int
+  pageInfo: PageInfo
+}
+
+type AiAgentHealth {
+  ready: Boolean!
+  checkedAt: String!
+  errors: [String!]!
+  warnings: [String!]!
+  checks: JSON
+}
+
+type AutomationEmailTemplate {
+  _id: String!
+  name: String!
+  description: String
+  content: String!
+  createdBy: String!
+  createdAt: Date
+  updatedAt: Date
+  createdUser: User
+}
+
+type AutomationEmailTemplatesListResponse {
+  list: [AutomationEmailTemplate]
+  totalCount: Float
+  pageInfo: PageInfo
+}
+
+input TriggerInput {
+  id: String
+  type: String
+  style: JSON
+  config: JSON
+  icon: String
+  label: String
+  description: String
+  position: JSON
+  workflowId: String
+  actionId: String
+  isCustom: Boolean
+}
+
+input ActionInput {
+  id: String
+  type: String
+  style: JSON
+  config: JSON
+  icon: String
+  label: String
+  description: String
+  position: JSON
+  workflowId: String
+  nextActionId: String
+  targetActionId: String
+}
+
+input WorkflowInput {
+  id: String
+  automationId: String
+  name: String
+  description: String
+  config: JSON
+  position: JSON
+}
+
+# ─── Products ────────────────────────────────────────────────────────────────
+
+type ProductCategory @key(fields: "_id") {
+  _id: String!
+  name: String
+  code: String
+  order: String
+  description: String
+  parentId: String
+  status: String
+}
+
+type Product @key(fields: "_id") @cacheControl(maxAge: 3) {
+  _id: String!
+  name: String
+  shortName: String
+  status: String
+  code: String
+  type: String
+  description: String
+  barcodes: [String]
+  variants: JSON
+  barcodeDescription: String
+  unitPrice: Float
+  categoryId: String
+  propertiesData: JSON
+  createdAt: Date
+  tagIds: [String]
+  attachment: Attachment
+  attachmentMore: [Attachment]
+  vendorId: String
+  scopeBrandIds: [String]
+  uom: String
+  subUoms: JSON
+  currency: String
+  category: ProductCategory
+  vendor: Company
+  hasSimilarity: Boolean
+  pdfAttachment: PdfAttachment
+  cursor: String
+  inventories: JSON
+  discounts: JSON
+  remainder: JSON
+  discount: JSON
+}
+
+type ProductsListResponse {
+  list: [Product]
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+# ─── Sales: Boards, Pipelines, Stages, Deals ─────────────────────────────────
+
+type SalesBoard @key(fields: "_id") {
+  _id: String!
+  name: String!
+  order: Int
+  createdAt: Date
+  type: String
+  pipelines: [SalesPipeline]
+}
+
+type SalesBoardCount {
+  _id: String
+  name: String
+  count: Int
+}
+
+type SalesConvertTo {
+  dealUrl: String
+}
+
+input SalesInterval {
+  startTime: Date
+  endTime: Date
+}
+
+type SalesPipeline @key(fields: "_id") {
+  _id: String!
+  name: String!
+  status: String
+  boardId: String!
+  tagId: String
+  tag: Tag
+  visibility: String!
+  memberIds: [String]
+  departmentIds: [String]
+  branchIds: [String]
+  members: [User]
+  bgColor: String
+  isWatched: Boolean
+  itemsTotalCount: Int
+  userId: String
+  createdUser: User
+  startDate: Date
+  endDate: Date
+  metric: String
+  hackScoringType: String
+  templateId: String
+  state: String
+  isCheckDate: Boolean
+  isCheckUser: Boolean
+  isCheckDepartment: Boolean
+  excludeCheckUserIds: [String]
+  numberConfig: String
+  numberSize: String
+  nameConfig: String
+  initialCategoryIds: [String]
+  excludeCategoryIds: [String]
+  excludeProductIds: [String]
+  paymentIds: [String]
+  paymentTypes: JSON
+  erxesAppToken: String
+  order: Int
+  createdAt: Date
+  type: String
+  cursor: String
+}
+
+type SalesPipelinesListResponse {
+  list: [SalesPipeline]
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+input SalesOrderItem {
+  _id: String!
+  order: Int!
+}
+
+type SalesStage @key(fields: "_id") {
+  _id: String!
+  name: String!
+  pipelineId: String!
+  visibility: String
+  code: String
+  memberIds: [String]
+  canMoveMemberIds: [String]
+  canEditMemberIds: [String]
+  members: [User]
+  departmentIds: [String]
+  probability: String
+  status: String
+  unUsedAmount: JSON
+  amount: JSON
+  itemsTotalCount: Int
+  compareNextStage: JSON
+  stayedDealsTotalCount: Int
+  initialDealsTotalCount: Int
+  inProcessDealsTotalCount: Int
+  formId: String
+  age: Int
+  defaultTick: Boolean
+  order: Int
+  createdAt: Date
+  type: String
+}
+
+type SalesPipelineLabel @key(fields: "_id") {
+  _id: String!
+  name: String
+  colorCode: String
+  pipelineId: String
+}
+
+type SalesTimeTrack {
+  status: String
+  timeSpent: Int
+  startDate: String
+}
+
+type DealTotalCurrency {
+  amount: Float
+  name: String
+}
+
+type Deal @key(fields: "_id") {
+  _id: String!
+  name: String
+  order: Float
+  createdAt: Date
+  hasNotified: Boolean
+  assignedUserIds: [String]
+  branchIds: [String]
+  departmentIds: [String]
+  branches: [Branch]
+  departments: [Department]
+  labelIds: [String]
+  startDate: Date
+  closeDate: Date
+  description: String
+  modifiedAt: Date
+  modifiedBy: String
+  reminderMinute: Int
+  isComplete: Boolean
+  isWatched: Boolean
+  stageId: String
+  boardId: String
+  priority: String
+  status: String
+  attachments: [Attachment]
+  userId: String
+  tagIds: [String]
+  relations: [String]
+  assignedUsers: [User]
+  stage: SalesStage
+  labels: [SalesPipelineLabel]
+  pipelineId: String
+  pipeline: SalesPipeline
+  createdUser: User
+  propertiesData: JSON
+  score: Float
+  timeTrack: SalesTimeTrack
+  number: String
+  stageChangedDate: Date
+  customProperties: JSON
+  unUsedAmount: JSON
+  amount: JSON
+  companies: [Company]
+  customers: [Customer]
+  tags: [Tag]
+  products: [Product]
+  productsData: JSON
+  mobileAmount: Float
+  mobileAmounts: JSON
+  paymentsData: JSON
+  extraData: JSON
+  cursor: String
+}
+
+type SalesTotalForType {
+  _id: String
+  name: String
+  currencies: [DealTotalCurrency]
+}
+
+type DealsListResponse {
+  list: [Deal]
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type DealSubscription {
+  action: String
+  deal: Deal
+}
+
+input SalesItemDate {
+  month: Int
+  year: Int
+}
+
+input SalesProductField {
+  productId: String
+  quantity: Int
+  unitPrice: Float
+}
+
+input IDealFilter {
+  stageId: String
+  initialStageId: String
+  _ids: [String]
+  date: SalesItemDate
+  parentId: String
+  pipelineId: String
+  pipelineIds: [String]
+  customerIds: [String]
+  companyIds: [String]
+  assignedUserIds: [String]
+  productIds: [String]
+  closeDateType: String
+  labelIds: [String]
+  search: String
+  priority: [String]
+  userIds: [String]
+  segment: String
+  segmentData: String
+  assignedToMe: String
+  startDate: String
+  endDate: String
+  hasStartAndCloseDate: Boolean
+  stageChangedStartDate: Date
+  stageChangedEndDate: Date
+  noSkipArchive: Boolean
+  tagIds: [String]
+  number: String
+  branchIds: [String]
+  departmentIds: [String]
+  boardIds: [String]
+  stageCodes: [String]
+  dateRangeFilters: JSON
+  createdStartDate: Date
+  createdEndDate: Date
+}
+
+# ─── Inbox: Channel, Integration ─────────────────────────────────────────────
+
+type Channel @key(fields: "_id") {
+  _id: String!
+  icon: String
+  name: String!
+  description: String
+  createdAt: Date
+  updatedAt: Date
+  memberCount: Int
+  pipelineCount: Int
+}
+
+type ChannelMember {
+  _id: String!
+  memberId: String!
+  channelId: String!
+  member: User
+  role: String
+}
+
+type Form @key(fields: "_id") {
+  _id: String!
+}
+
+type Integration @key(fields: "_id") {
+  _id: String!
+  kind: String!
+  name: String!
+  languageCode: String
+  code: String
+  formId: String
+  tagIds: [String]
+  createdAt: Date
+  tags: [Tag]
+  brandId: String
+  leadData: JSON
+  messengerData: JSON
+  ticketConfigId: JSON
+  uiOptions: JSON
+  isActive: Boolean
+  isConnected: Boolean
+  webhookData: JSON
+  channelId: String
+  channel: Channel
+  healthStatus: JSON
+  form: Form
+  visibility: String
+  departmentIds: [String]
+  details: JSON
+}
+
+type IntegrationResponse {
+  list: [Integration]
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+# ─── Inbox: Conversation & Message ───────────────────────────────────────────
+
+type EngageData {
+  messageId: String
+  brandId: String
+  content: String
+  fromUserId: String
+  fromUser: User
+  kind: String
+  sentAs: String
+}
+
+type Email {
+  email: String
+}
+
+type MailAttachment {
+  id: String
+  content_type: String
+  filename: String
+  mimeType: String
+  size: Int
+  attachmentId: String
+  data: String
+}
+
+type MailData {
+  messageId: String
+  threadId: String
+  replyTo: [String]
+  inReplyTo: String
+  subject: String
+  body: String
+  integrationEmail: String
+  to: [Email]
+  from: [Email]
+  cc: [Email]
+  bcc: [Email]
+  accountId: String
+  replyToMessageId: [String]
+  references: [String]
+  headerId: String
+  attachments: [MailAttachment]
+}
+
+type ConversationMessage {
+  _id: String!
+  content: String
+  attachments: [Attachment]
+  mentionedUserIds: [String]
+  conversationId: String
+  internal: Boolean
+  fromBot: Boolean
+  getStarted: Boolean
+  botData: JSON
+  customerId: String
+  userId: String
+  createdAt: Date
+  isCustomerRead: Boolean
+  engageData: EngageData
+  formWidgetData: JSON
+  messengerAppData: JSON
+  botGreetMessage: String
+  user: User
+  mailData: MailData
+  contentType: String
+  mid: String
+}
+
+type Conversation {
+  _id: String!
+  content: String
+  integrationId: String
+  customerId: String
+  userId: String
+  assignedUserId: String
+  participatedUserIds: [String]
+  readUserIds: [String]
+  createdAt: Date
+  updatedAt: Date
+  idleTime: Float
+  status: String
+  messageCount: Int
+  number: Int
+  tagIds: [String]
+  operatorStatus: String
+  messages: [ConversationMessage]
+  callProAudio: String
+  tags: [Tag]
+  customer: Customer
+  integration: Integration
+  user: User
+  assignedUser: User
+  participatedUsers: [User]
+  readUsers: [User]
+  participatorCount: Int
+  customFieldsData: JSON
+  cursor: String
+}
+
+type ConversationListResponse {
+  list: [Conversation]
+  totalCount: Int
+  pageInfo: PageInfo
+}
+
+type UserConversationListResponse {
+  list: [Conversation]
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type ConversationChangedResponse {
+  conversationId: String!
+  type: String!
+}
+
+input ConversationMessageParams {
+  content: String
+  mentionedUserIds: [String]
+  conversationId: String
+  internal: Boolean
+  customerId: String
+  userId: String
+  createdAt: Date
+  isCustomerRead: Boolean
+}
+
+# ─── Frontline: Ticket ────────────────────────────────────────────────────────
+
+type TicketStatus @key(fields: "_id") {
+  _id: String!
+  name: String
+  color: String
+  order: Int
+  type: String
+}
+
+type Ticket {
+  _id: String
+  name: String
+  description: String
+  pipelineId: String
+  statusId: String
+  priority: Int
+  labelIds: [String]
+  tagIds: [String]
+  assigneeId: String
+  createdBy: String
+  userId: String
+  startDate: Date
+  targetDate: Date
+  createdAt: Date
+  updatedAt: Date
+  channelId: String
+  statusChangedDate: Date
+  number: String
+  status: TicketStatus
+  assignee: User
+  isSubscribed: Boolean
+  propertiesData: JSON
+  state: String
+  attachments: [Attachment]
+  companyIds: [String]
+  customerFieldData: JSON
+}
+
+type TicketListResponse {
+  list: [Ticket]
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type TicketSubscription {
+  type: String
+  ticket: Ticket
+}
+
+type RemoveResponse {
+  ok: Int!
+  removedIds: [String!]!
+}
+
+input ITicketFilter {
+  _id: String
+  statusId: String
+  priority: Int
+  pipelineId: String
+  assigneeId: String
+  createdBy: String
+  labelIds: [String]
+  tagIds: [String]
+  startDate: Date
+  targetDate: Date
+  channelId: String
+  userId: String
+  searchValue: String
+  statusType: Int
+  state: String
+  limit: Int
+  cursor: String
+  direction: CURSOR_DIRECTION
+}
+
+# ─── Operation: Task ─────────────────────────────────────────────────────────
+
+enum CycleFilterType {
+  noCycle
+  anyPastCycle
+  previousCycle
+  currentCycle
+  upcomingCycle
+  anyFutureCycle
+}
+
+type Task {
+  _id: String
+  name: String
+  description: String
+  status: String
+  priority: Int
+  labelIds: [String]
+  tagIds: [String]
+  assigneeId: String
+  createdBy: String
+  startDate: Date
+  targetDate: Date
+  createdAt: Date
+  updatedAt: Date
+  cycleId: String
+  projectId: String
+  teamId: String
+  milestoneId: String
+  estimatePoint: Int
+  statusChangedDate: Date
+  number: Int
+}
+
+type TaskListResponse {
+  list: [Task]
+  pageInfo: PageInfo
+  totalCount: Int
+}
+
+type TaskSubscription {
+  type: String
+  task: Task
+}
+
+input ITaskFilter {
+  _id: String
+  status: String
+  priority: Int
+  assigneeId: String
+  createdBy: String
+  cycleId: String
+  labelIds: [String]
+  tagIds: [String]
+  projectId: String
+  teamId: String
+  estimatePoint: Int
+  userId: String
+  name: String
+  statusType: Int
+  estimate: String
+  milestoneId: String
+  cycleFilter: CycleFilterType
+  projectStatus: Int
+  projectPriority: Int
+  projectLeadId: String
+  projectMilestoneName: String
+  startDate: Date
+  targetDate: Date
+  createdDate: Date
+  updatedDate: Date
+  completedDate: Date
+  limit: Int
+  cursor: String
+  direction: CURSOR_DIRECTION
+}
+
+# ─── Root Query ───────────────────────────────────────────────────────────────
+
+type Query {
+  # Auth
+  currentUser: User
+  oauthClientApps(searchValue: String, page: Int, perPage: Int): [OAuthClientApp]
+  oauthClientAppsTotalCount(searchValue: String): Int
+  oauthClientAppDetail(_id: String!): OAuthClientApp
+
+  # Users / Team Members
+  users(sortField: String, status: String, excludeIds: Boolean, searchValue: String, isActive: Boolean, requireUsername: Boolean, ids: [String], brandIds: [String], departmentId: String, branchId: String, isAssignee: Boolean, branchIds: [String], departmentIds: [String], unitId: String, segment: String, segmentData: String, limit: Int, cursor: String): UsersListResponse
+  allUsers(isActive: Boolean, ids: [String], assignedToMe: String, searchValue: String): [User]
+  userDetail(_id: String): User
+  usersTotalCount(searchValue: String, isActive: Boolean, requireUsername: Boolean, ids: [String], brandIds: [String], departmentId: String, branchId: String, isAssignee: Boolean, branchIds: [String], departmentIds: [String], unitId: String, segment: String, segmentData: String): Int
+  userMovements(userId: String!, contentType: String): [UserMovement]
+
+  # Permissions
+  permissionModules: [PermissionModulesByPlugin]
+  permissionDefaultGroups: [DefaultPermissionGroup]
+  permissionGroups: [PermissionGroup]
+  permissionGroupDetail(id: String!): PermissionGroup
+  currentUserPermissions: CurrentUserPermissionsResult
+
+  # Customers
+  customers(segment: String, type: String, ids: [String], excludeIds: Boolean, tagIds: [String], excludeTagIds: [String], tagWithRelated: Boolean, brandIds: [String], integrationIds: [String], integrationTypes: [String], formIds: [String], searchValue: String, autoCompletion: Boolean, autoCompletionType: String, startDate: String, endDate: String, leadStatus: String, sortField: String, sortDirection: Int, sex: Int, birthDate: Date, dateFilters: String, propertiesData: String, segmentData: String, emailValidationStatus: String, status: CONTACT_STATUS, conformityMainType: String, conformityMainTypeId: String, conformityRelType: String, conformityIsRelated: Boolean, conformityIsSaved: Boolean, limit: Int, cursor: String): CustomersListResponse
+  customersCount(types: [CUSTOMER_RELATION_TYPE]): JSON
+  customerDetail(_id: String!): Customer
+  contactsLogs(action: String, content: JSON, contentType: String): JSON
+  cpCustomers(segment: String, type: String, ids: [String], excludeIds: Boolean, tagIds: [String], searchValue: String, limit: Int, cursor: String): CustomersListResponse
+  cpCustomerDetail(_id: String!): Customer
+
+  # Companies
+  companies(segment: String, tagIds: [String], excludeTagIds: [String], tagWithRelated: Boolean, ids: [String], excludeIds: Boolean, searchValue: String, autoCompletion: Boolean, autoCompletionType: String, sortField: String, sortDirection: Int, dateFilters: String, segmentData: String, status: CONTACT_STATUS, conformityMainType: String, conformityMainTypeId: String, conformityRelType: String, conformityIsRelated: Boolean, conformityIsSaved: Boolean, limit: Int, cursor: String): CompaniesListResponse
+  companyDetail(_id: String!): Company
+
+  # Tags
+  tagsGetTypes: JSON
+  tags(type: String, searchValue: String, parentId: String, ids: [String], excludeIds: Boolean, isGroup: Boolean, instanceId: String, includeWorkspaceTags: Boolean, sortField: String, limit: Int, cursor: String): TagsListResponse
+  tagsMain(type: String, excludeWorkspaceTags: Boolean): [Tag]
+  tagDetail(_id: String!): Tag
+  tagsQueryCount(type: String, searchValue: String): Int
+  cpTags(type: String, searchValue: String, parentId: String, ids: [String], excludeIds: Boolean, isGroup: Boolean, instanceId: String, includeWorkspaceTags: Boolean): [Tag]
+
+  # Segments
+  segmentsGetTypes: [JSON]
+  segmentsGetAssociationTypes(contentType: String!): [JSON]
+  segments(contentTypes: [String]!, config: JSON, ids: [String], excludeIds: [String], searchValue: String): [Segment]
+  segmentDetail(_id: String): Segment
+  segmentsGetHeads(contentType: String): [Segment]
+  segmentsEvents(contentType: String!): [JSON]
+  segmentsPreviewCount(contentType: String!, conditions: JSON, subOf: String, config: JSON, conditionsConjunction: String): JSON
+
+  # Notifications
+  pluginsNotifications: [NotificationPluginType]
+  notifications(limit: Int, cursor: String, ids: [String], status: NotificationStatus, priority: NotificationPriority, type: NotificationType, fromDate: String, endDate: String, fromUserId: String): NotificationsList
+  notificationDetail(_id: String!): Notification
+  unreadNotificationsCount: Int
+  notificationSettings: NotificationSettings
+
+  # Automations
+  automationsMain(page: Int, perPage: Int, ids: [String], excludeIds: [String], searchValue: String, sortField: String, sortDirection: Int, status: String, tagIds: [String], createdByIds: [String], updatedByIds: [String], createdAtFrom: Date, createdAtTo: Date, updatedAtFrom: Date, updatedAtTo: Date, triggerTypes: [String], actionTypes: [String], limit: Int, cursor: String): AutomationsListResponse
+  automations(page: Int, perPage: Int, ids: [String], excludeIds: [String], searchValue: String, sortField: String, sortDirection: Int, status: String, tagIds: [String]): [Automation]
+  automationDetail(_id: String!): Automation
+  cpAutomationDetail(_id: String!): Automation
+  automationNotes(automationId: String!, triggerId: String, actionId: String): [AutomationNote]
+  automationHistories(automationId: String!, page: Int, perPage: Int, status: String, triggerId: String, triggerType: String, beginDate: Date, endDate: Date, targetId: String, targetIds: [String], triggerTypes: [String], ids: [String], limit: Int, cursor: String): AutomationHistories
+  automationHistoriesTotalCount(automationId: String!, page: Int, perPage: Int, status: String, triggerId: String, triggerType: String, beginDate: Date, endDate: Date, targetId: String): Int
+  automationsTotalCount(status: String): automationsTotalCountResponse
+  automationConstants: JSON
+  automationSetPropertyTargets(sourceType: String!): JSON
+  automationNodeOutput(nodeType: String!): JSON
+  automationReferenceFields(type: String!, field: String!): JSON
+  automationsAiAgents(kind: String): JSON
+  automationsAiAgentDetail(_id: String): JSON
+  automationsAiAgentHealth(agentId: String!): AiAgentHealth!
+  getAutomationWebhookEndpoint(_id: String!, waitEventActionId: String): String
+  getAutomationExecutionDetail(executionId: String!): AutomationHistory
+  automationEmailTemplates(page: Int, perPage: Int, searchValue: String, sortField: String, sortDirection: Int): AutomationEmailTemplatesListResponse
+  automationEmailTemplateDetail(_id: String!): AutomationEmailTemplate
+
+  # Products
+  products(type: String, status: String, categoryId: String, categoryIds: [String], searchValue: String, vendorId: String, brandIds: [String], tag: String, tagIds: [String], ids: [String], excludeIds: Boolean, pipelineId: String, boardId: String, segment: String, segmentData: String, groupedSimilarity: String, limit: Int, cursor: String): ProductsListResponse
+  productDetail(_id: String!): Product
+  productCategories(status: String, parentId: String, searchValue: String, ids: [String]): [ProductCategory]
+  productCategoryDetail(_id: String!): ProductCategory
+
+  # Sales: Boards
+  salesBoards: [SalesBoard]
+  cpSalesBoards: [SalesBoard]
+  salesBoardCounts: [SalesBoardCount]
+  salesBoardGetLast: SalesBoard
+  salesBoardDetail(_id: String!): SalesBoard
+  cpSalesBoardDetail(_id: String!): SalesBoard
+  salesConvertToInfo(conversationId: String!): SalesConvertTo
+  salesItemsCountByAssignedUser(pipelineId: String!, stackBy: String): JSON
+  salesCardsFields: JSON
+  salesBoardContentTypeDetail(contentType: String, contentId: String): JSON
+  salesBoardLogs(action: String, content: JSON, contentId: String): JSON
+  salesCheckFreeTimes(pipelineId: String, intervals: [SalesInterval]): JSON
+
+  # Sales: Pipelines
+  salesPipelines(boardId: String, isAll: Boolean, limit: Int, cursor: String): SalesPipelinesListResponse
+  salesPipelineDetail(_id: String!): SalesPipeline
+  salesPipelineAssignedUsers(_id: String!): [User]
+  salesPipelineStateCount(boardId: String): JSON
+  cpSalesPipelines(boardId: String, isAll: Boolean, limit: Int, cursor: String): SalesPipelinesListResponse
+  cpSalesPipelineDetail(_id: String!): SalesPipeline
+
+  # Sales: Stages
+  salesStages(isNotLost: Boolean, isAll: Boolean, pipelineId: String, pipelineIds: [String], search: String, companyIds: [String], customerIds: [String], assignedUserIds: [String], labelIds: [String], extraParams: JSON, closeDateType: String, assignedToMe: String, age: Int, branchIds: [String], departmentIds: [String], segment: String, segmentData: String): [SalesStage]
+  salesStageDetail(_id: String!, search: String, companyIds: [String], customerIds: [String], assignedUserIds: [String], labelIds: [String], extraParams: JSON, closeDateType: String, assignedToMe: String, age: Int, branchIds: [String], departmentIds: [String], segment: String, segmentData: String): SalesStage
+  salesArchivedStages(pipelineId: String!, search: String): [SalesStage]
+  salesArchivedStagesCount(pipelineId: String!, search: String): Int
+  cpSalesStages(isNotLost: Boolean, isAll: Boolean, pipelineId: String, pipelineIds: [String]): [SalesStage]
+
+  # Deals
+  deals(stageId: String, initialStageId: String, _ids: [String], date: SalesItemDate, parentId: String, pipelineId: String, pipelineIds: [String], customerIds: [String], companyIds: [String], assignedUserIds: [String], productIds: [String], closeDateType: String, labelIds: [String], search: String, priority: [String], userIds: [String], segment: String, segmentData: String, assignedToMe: String, startDate: String, endDate: String, hasStartAndCloseDate: Boolean, stageChangedStartDate: Date, stageChangedEndDate: Date, noSkipArchive: Boolean, tagIds: [String], number: String, branchIds: [String], departmentIds: [String], boardIds: [String], stageCodes: [String], dateRangeFilters: JSON, limit: Int, cursor: String): DealsListResponse
+  dealDetail(_id: String!, clientPortalCard: Boolean): Deal
+  dealLink(_id: String): JSON
+  dealsTotalCount(stageId: String, pipelineId: String, limit: Int, cursor: String): Int
+  dealsTotalAmounts(pipelineId: String, limit: Int, cursor: String): [SalesTotalForType]
+  archivedDeals(pipelineId: String!, search: String, userIds: [String], priorities: [String], assignedUserIds: [String], labelIds: [String], productIds: [String], companyIds: [String], customerIds: [String], startDate: String, endDate: String, limit: Int, cursor: String): DealsListResponse
+  archivedDealsCount(pipelineId: String!, search: String): Int
+  cpDeals(stageId: String, pipelineId: String, limit: Int, cursor: String): DealsListResponse
+  cpDealDetail(_id: String!, clientPortalCard: Boolean): Deal
+  checkDiscount(_id: String!, products: [SalesProductField!]!, couponCode: String, voucherId: String): JSON
+
+  # Channels
+  getChannel(_id: String!): Channel
+  getChannels(name: String, userId: String, channelIds: [String], integrationId: String): [Channel]
+  getMyChannels(name: String): [Channel]
+  getChannelMembers(channelId: String, channelIds: [String]): [ChannelMember]
+
+  # Integrations
+  integrations(page: Int, perPage: Int, kind: String, searchValue: String, channelId: String!, tag: String, status: String, formLoadType: String, sortField: String, sortDirection: Int, limit: Int, cursor: String): IntegrationResponse
+  allLeadIntegrations: [Integration]
+  integrationsGetUsedTypes: [JSON]
+  integrationGetLineWebhookUrl(_id: String!): String
+  integrationDetail(_id: String!): Integration
+  integrationsTotalCount(kind: String, tag: String, channelId: String!, status: String, formLoadType: String): JSON
+
+  # Conversations
+  conversationMessage(_id: String!): ConversationMessage
+  conversations(ids: [String], limit: Int, cursor: String, direction: CURSOR_DIRECTION, channelId: String, status: String, unassigned: String, tag: String, integrationType: String, participating: String, awaitingResponse: String, starred: String, startDate: String, endDate: String, segment: String, customerId: String, brandId: String, skip: Int): ConversationListResponse
+  conversationMessages(conversationId: String!, skip: Int, limit: Int, getFirst: Boolean): [ConversationMessage]
+  conversationMessagesTotalCount(conversationId: String!): Int
+  conversationCounts(ids: [String], channelId: String, status: String, unassigned: String, tag: String, integrationType: String, participating: String, awaitingResponse: String, starred: String, startDate: String, endDate: String, segment: String, customerId: String, brandId: String, only: String): JSON
+  conversationsTotalCount(ids: [String], channelId: String, status: String, limit: Int, cursor: String): Int
+  conversationDetail(_id: String!): Conversation
+  conversationsGetLast(channelId: String, status: String): Conversation
+  conversationsTotalUnreadCount: Int
+  userConversations(_id: String, limit: Int, cursor: String, perPage: Int): UserConversationListResponse
+
+  # Tickets
+  getTicket(_id: String!): Ticket
+  getTickets(filter: ITicketFilter): TicketListResponse
+  cpGetTickets(filter: ITicketFilter): [Ticket]
+  cpGetTicket(_id: String!): Ticket
+  cpGetTicketTotalCount(filter: ITicketFilter): Int
+
+  # Tasks (Operation plugin)
+  getTask(_id: String!): Task
+  getTasks(filter: ITaskFilter): TaskListResponse
+
+  # Fields / Properties
+  fieldsCombinedByContentType(contentType: String!, usageType: String, excludedNames: [String], segmentId: String, config: JSON, onlyDates: Boolean): JSON
+}
+
+# ─── Root Mutation ────────────────────────────────────────────────────────────
+
+type Mutation {
+  # Auth
+  login(email: String!, password: String!, deviceToken: String): String
+  logout: String
+  forgotPassword(email: String!): String!
+  resetPassword(token: String!, newPassword: String!): JSON
+  loginWithGoogle: String
+  loginWithMagicLink(email: String!): String
+  oauthClientAppsAdd(name: String!, logo: String, description: String, type: OAuthClientAppType!, accessTokenLifetime: OAuthClientAccessTokenLifetime, redirectUrls: [String!]): OAuthClientApp
+  oauthClientAppsEdit(_id: String!, name: String!, logo: String, description: String, type: OAuthClientAppType!, accessTokenLifetime: OAuthClientAccessTokenLifetime, redirectUrls: [String!]): OAuthClientApp
+  oauthClientAppsRevoke(_id: String!): OAuthClientApp
+  oauthClientAppsRemove(_id: String!): JSON
+
+  # Users
+  usersResetMemberPassword(_id: String!, newPassword: String!): User
+  usersEditProfile(username: String!, email: String!, details: UserDetails, links: JSON, employeeId: String, positionIds: [String]): User
+  usersEdit(_id: String!, username: String, email: String, details: UserDetails, links: JSON, channelIds: [String], groupIds: [String], brandIds: [String], branchIds: [String], positionIds: [String], departmentIds: [String], unitId: String, propertiesData: JSON, employeeId: String, password: String, isOnboarded: Boolean, score: Float): User
+  usersChangePassword(currentPassword: String!, newPassword: String!): User
+  usersSetActiveStatus(_id: String!): User
+  usersInvite(entries: [InvitationEntry]): Boolean
+  usersResendInvitation(email: String!): String
+  usersConfirmInvitation(token: String): String
+  usersConfigEmailSignatures(signatures: [EmailSignature]): User
+  usersConfigGetNotificationByEmail(isAllowed: Boolean): User
+  usersSetChatStatus(_id: String!, status: UserChatStatus): User
+  editOrganizationInfo(icon: String, logo: String, link: String, name: String, iconColor: String, backgroundColor: String, description: String, domain: String, favicon: String, textColor: String): Organization
+  editOrganizationDomain(type: String, domain: String): Organization
+  usersCreateOwner(email: String!, password: String!, firstName: String!, lastName: String, purpose: String, subscribeEmail: Boolean): String
+  usersSetActiveStatusBatch(_ids: [String!]!): Boolean
+
+  # Permissions
+  permissionGroupAdd(name: String!, description: String, permissions: [PermissionInput]!): PermissionGroup
+  permissionGroupEdit(_id: String!, name: String, description: String, permissions: [PermissionInput]): PermissionGroup
+  permissionGroupRemove(_id: String!): JSON
+  userUpdatePermissionGroups(userId: String!, groupIds: [String]!): User
+  usersUpdatePermissionGroups(userIds: [String]!, groupIds: [String]!): JSON
+  userAddCustomPermission(userId: String!, permission: PermissionInput!): User
+  userRemoveCustomPermission(userId: String!, module: String!): User
+
+  # Customers
+  customersAdd(state: String, avatar: String, firstName: String, lastName: String, middleName: String, primaryEmail: String, emails: [String], primaryPhone: String, phones: [String], primaryAddress: JSON, addresses: [JSON], ownerId: String, position: String, department: String, leadStatus: String, hasAuthority: String, description: String, isSubscribed: String, links: JSON, propertiesData: JSON, code: String, sex: Int, birthDate: Date, emailValidationStatus: String, phoneValidationStatus: String): Customer
+  customersEdit(_id: String!, avatar: String, firstName: String, lastName: String, middleName: String, primaryEmail: String, emails: [String], primaryPhone: String, phones: [String], primaryAddress: JSON, addresses: [JSON], ownerId: String, position: String, department: String, leadStatus: String, hasAuthority: String, description: String, isSubscribed: String, links: JSON, propertiesData: JSON, code: String, sex: Int, birthDate: Date, emailValidationStatus: String, phoneValidationStatus: String): Customer
+  customersRemove(customerIds: [String]): [String]
+  customersMerge(customerIds: [String], customerFields: JSON): Customer
+  customersVerify(verificationType: String!): String
+  customersChangeState(_id: String!, value: String!): Customer
+  customersChangeVerificationStatus(customerIds: [String], type: String!, status: String!): [Customer]
+  customersChangeStateBulk(_ids: [String]!, value: String!): JSON
+  cpCustomersAdd(state: String, avatar: String, firstName: String, lastName: String, primaryEmail: String, primaryPhone: String): Customer
+
+  # Companies
+  companiesAdd(avatar: String, primaryName: String, names: [String], primaryPhone: String, phones: [String], primaryEmail: String, emails: [String], primaryAddress: JSON, addresses: [JSON], size: Int, website: String, industry: [String], parentCompanyId: String, ownerId: String, businessType: String, description: String, isSubscribed: String, links: JSON, tagIds: [String], propertiesData: JSON, code: String, location: String): Company
+  companiesEdit(_id: String!, avatar: String, primaryName: String, names: [String], primaryPhone: String, phones: [String], primaryEmail: String, emails: [String], primaryAddress: JSON, addresses: [JSON], size: Int, website: String, industry: [String], parentCompanyId: String, ownerId: String, businessType: String, description: String, isSubscribed: String, links: JSON, tagIds: [String], propertiesData: JSON, code: String, location: String): Company
+  companiesRemove(companyIds: [String]): [String]
+  companiesMerge(companyIds: [String], companyFields: JSON): Company
+
+  # Tags
+  tagsAdd(name: String!, type: String, colorCode: String, parentId: String, isGroup: Boolean, description: String): Tag
+  tagsEdit(_id: String!, name: String, type: String, colorCode: String, parentId: String, isGroup: Boolean, description: String): Tag
+  tagsTag(type: String!, targetIds: [String!]!, tagIds: [String!]!): JSON
+  cpTagsTag(type: String!, targetIds: [String!]!, tagIds: [String!]!): JSON
+  tagsRemove(_id: String!): JSON
+  cpTagsAdd(name: String!, type: String, colorCode: String, parentId: String, isGroup: Boolean, description: String): Tag
+
+  # Segments
+  segmentsAdd(contentType: String!, name: String, description: String, subOf: String, color: String, conditions: [SegmentCondition], config: JSON, conditionsConjunction: String, conditionSegments: [SubSegment], shouldWriteActivityLog: Boolean!): Segment
+  segmentsEdit(_id: String!, contentType: String, name: String, description: String, subOf: String, color: String, conditions: [SegmentCondition], config: JSON, conditionsConjunction: String, conditionSegments: [SubSegment], shouldWriteActivityLog: Boolean!): Segment
+  segmentsRemove(_id: String, ids: [String]): JSON
+
+  # Notifications
+  archiveNotification(_id: String!): String
+  archiveNotifications(ids: [String], archiveAll: Boolean, filters: NotificationFilters): String
+  markNotificationAsRead(_id: String!): JSON
+  markAsReadNotifications(ids: [String], status: NotificationStatus, priority: NotificationPriority, type: NotificationType, fromDate: String, endDate: String, fromUserId: String): JSON
+  updateNotificationSettingsEvent(input: NotificationSettingsEventInput): JSON
+  updateNotificationSettingsChannel(input: NotificationSettingsChannelInput): JSON
+
+  # Automations
+  automationsAdd(name: String, status: String, edgeType: String, flowDirection: String, triggers: [TriggerInput], actions: [ActionInput], workflows: [WorkflowInput]): Automation
+  automationsEdit(_id: String, name: String, status: String, edgeType: String, flowDirection: String, triggers: [TriggerInput], actions: [ActionInput], workflows: [WorkflowInput]): Automation
+  automationsRemove(automationIds: [String]): [String]
+  archiveAutomations(automationIds: [String], isRestore: Boolean): [String]
+  automationsSaveAsTemplate(_id: String!, name: String, duplicate: Boolean): Automation
+  automationsCreateFromTemplate(_id: String): Automation
+  automationsAddNote(automationId: String, triggerId: String, actionId: String, description: String): AutomationNote
+  automationsEditNote(_id: String!, automationId: String, triggerId: String, actionId: String, description: String): AutomationNote
+  automationsRemoveNote(_id: String!): AutomationNote
+  automationEmailTemplatesAdd(name: String!, description: String, content: String!): AutomationEmailTemplate
+  automationEmailTemplatesEdit(_id: String!, name: String!, description: String, content: String!): AutomationEmailTemplate
+  automationEmailTemplatesRemove(_id: String!): JSON
+
+  # Sales: Boards
+  salesBoardsAdd(name: String!): SalesBoard
+  salesBoardsEdit(_id: String!, name: String!): SalesBoard
+  salesBoardsRemove(_id: String!): JSON
+  salesBoardItemUpdateTimeTracking(_id: String!, status: String!, timeSpent: Int!, startDate: String): JSON
+  salesBoardItemsSaveForGanttTimeline(items: JSON, links: JSON): String
+
+  # Sales: Pipelines
+  salesPipelinesAdd(name: String!, boardId: String!, stages: JSON, visibility: String!, memberIds: [String], tagId: String, bgColor: String, startDate: Date, endDate: Date, metric: String, hackScoringType: String, templateId: String, isCheckDate: Boolean, isCheckUser: Boolean, isCheckDepartment: Boolean, excludeCheckUserIds: [String], numberConfig: String, numberSize: String, nameConfig: String, departmentIds: [String], branchIds: [String], initialCategoryIds: [String], excludeCategoryIds: [String], excludeProductIds: [String], paymentIds: [String], paymentTypes: JSON, erxesAppToken: String): SalesPipeline
+  salesPipelinesEdit(_id: String!, name: String!, boardId: String!, stages: JSON, visibility: String!, memberIds: [String], tagId: String, bgColor: String, startDate: Date, endDate: Date, metric: String, hackScoringType: String, templateId: String, isCheckDate: Boolean, isCheckUser: Boolean, isCheckDepartment: Boolean, excludeCheckUserIds: [String], numberConfig: String, numberSize: String, nameConfig: String, departmentIds: [String], branchIds: [String], initialCategoryIds: [String], excludeCategoryIds: [String], excludeProductIds: [String], paymentIds: [String], paymentTypes: JSON, erxesAppToken: String): SalesPipeline
+  salesPipelinesUpdateOrder(orders: [SalesOrderItem]): [SalesPipeline]
+  salesPipelinesWatch(_id: String!, isAdd: Boolean): SalesPipeline
+  salesPipelinesRemove(_id: String!): JSON
+  salesPipelinesArchive(_id: String!): JSON
+  salesPipelinesCopied(_id: String!): JSON
+
+  # Sales: Stages
+  salesStagesUpdateOrder(orders: [SalesOrderItem]): [SalesStage]
+  salesStagesRemove(_id: String!): JSON
+  salesStagesEdit(_id: String!, name: String, status: String): SalesStage
+  salesStagesSortItems(stageId: String!, processId: String, sortType: String): String
+
+  # Deals
+  dealsAdd(name: String, companyIds: [String], customerIds: [String], labelIds: [String], parentId: String, processId: String, aboveItemId: String, stageId: String, assignedUserIds: [String], attachments: [AttachmentInput], startDate: Date, closeDate: Date, description: String, order: Int, reminderMinute: Int, isComplete: Boolean, priority: String, status: String, sourceConversationIds: [String], propertiesData: JSON, tagIds: [String], branchIds: [String], departmentIds: [String], paymentsData: JSON, mobileAmount: Float, mobileAmounts: JSON, productsData: JSON, extraData: JSON): Deal
+  dealsEdit(_id: String!, name: String, parentId: String, processId: String, aboveItemId: String, stageId: String, assignedUserIds: [String], attachments: [AttachmentInput], startDate: Date, closeDate: Date, description: String, order: Int, reminderMinute: Int, isComplete: Boolean, priority: String, status: String, propertiesData: JSON, tagIds: [String], branchIds: [String], departmentIds: [String], paymentsData: JSON, mobileAmount: Float, mobileAmounts: JSON, productsData: JSON, extraData: JSON): Deal
+  dealsChange(itemId: String!, aboveItemId: String, destinationStageId: String!, sourceStageId: String, processId: String): Deal
+  dealsRemove(_id: String!): Deal
+  dealsWatch(_id: String, isAdd: Boolean): Deal
+  dealsCopy(_id: String!, processId: String): Deal
+  dealsArchive(stageId: String!, processId: String): String
+  dealsCreateProductsData(processId: String, dealId: String, docs: JSON): JSON
+  dealsEditProductData(processId: String, dealId: String, dataId: String, doc: JSON): JSON
+  dealsDeleteProductData(processId: String, dealId: String, dataIds: [String]): JSON
+  cpDealsAdd(name: String, companyIds: [String], customerIds: [String], labelIds: [String], stageId: String, assignedUserIds: [String], startDate: Date, closeDate: Date, description: String, priority: String, productsData: JSON): Deal
+  cpDealsEdit(_id: String!, name: String, stageId: String, assignedUserIds: [String], startDate: Date, closeDate: Date, description: String, priority: String, productsData: JSON): Deal
+  cpDealsChange(itemId: String!, aboveItemId: String, destinationStageId: String!, sourceStageId: String, processId: String): Deal
+  cpDealsCreateProductsData(processId: String, dealId: String, docs: JSON): JSON
+  cpDealsEditProductData(processId: String, dealId: String, dataId: String, doc: JSON): JSON
+
+  # Channels
+  channelAdd(name: String!, icon: String, description: String, memberIds: [String]): Channel
+  channelUpdate(_id: String!, name: String, description: String, icon: String, memberIds: [String]): Channel
+  channelRemove(_id: String!): Channel
+  channelAddMembers(_id: String!, memberIds: [String]): [ChannelMember]
+  channelRemoveMember(channelId: String!, memberId: String!): ChannelMember
+  channelRemoveMembers(channelId: String!, memberIds: [String]): [ChannelMember]
+  channelUpdateMember(_id: String!, role: String): ChannelMember
+
+  # Conversations
+  conversationMessageAdd(conversationId: String, responseTemplateId: String, content: String, mentionedUserIds: [String], internal: Boolean, attachments: [AttachmentInput], contentType: String, extraInfo: JSON): ConversationMessage
+  conversationMessageEdit(_id: String!, content: String, mentionedUserIds: [String], internal: Boolean, attachments: [AttachmentInput], contentType: String, extraInfo: JSON): ConversationMessage
+  conversationsAssign(conversationIds: [String]!, assignedUserId: String): [Conversation]
+  conversationsUnassign(_ids: [String]!): [Conversation]
+  conversationsChangeStatus(_ids: [String]!, status: String!): [Conversation]
+  conversationMarkAsRead(_id: String): Conversation
+  changeConversationOperator(_id: String!, operatorStatus: String!): JSON
+  conversationsResolve(ids: [String!]!): Int
+  conversationConvertToCard(_id: String!, type: String!, itemId: String, itemName: String, stageId: String, customFieldsData: JSON, priority: String, assignedUserIds: [String], labelIds: [String], startDate: Date, closeDate: Date, attachments: [AttachmentInput], description: String): String
+  conversationEditCustomFields(_id: String!, customFieldsData: JSON): Conversation
+
+  # Tickets
+  createTicket(name: String!, description: String, channelId: String!, pipelineId: String!, statusId: String!, stageId: String, priority: Int, labelIds: [String], tagIds: [String], startDate: Date, targetDate: Date, assigneeId: String, state: String, propertiesData: JSON, attachments: [AttachmentInput], companyIds: [String], customerFieldData: JSON): Ticket
+  updateTicket(_id: String!, name: String, description: String, channelId: String, pipelineId: String, statusId: String, destinationStatusId: String, priority: Int, labelIds: [String], tagIds: [String], assigneeId: String, startDate: Date, targetDate: Date, isSubscribed: Boolean, state: String, propertiesData: JSON, attachments: [AttachmentInput], companyIds: [String], customerFieldData: JSON): Ticket
+  removeTicket(_id: [String!]!): RemoveResponse!
+  cpCreateTicket(name: String!, description: String, channelId: String!, pipelineId: String!, statusId: String!, stageId: String, priority: Int, labelIds: [String], tagIds: [String], startDate: Date, targetDate: Date, assigneeId: String, state: String, propertiesData: JSON, attachments: [AttachmentInput], companyIds: [String], customerFieldData: JSON): Ticket
+  cpUpdateTicket(_id: String!, name: String, description: String, channelId: String, pipelineId: String, statusId: String, destinationStatusId: String, priority: Int, labelIds: [String], tagIds: [String], assigneeId: String, startDate: Date, targetDate: Date, isSubscribed: Boolean, state: String, propertiesData: JSON, attachments: [AttachmentInput], companyIds: [String], customerFieldData: JSON): Ticket
+
+  # Tasks (Operation plugin)
+  createTask(name: String!, description: String, teamId: String!, status: String, priority: Int, labelIds: [String], tagIds: [String], startDate: Date, targetDate: Date, assigneeId: String, cycleId: String, projectId: String, estimatePoint: Int, milestoneId: String): Task
+  updateTask(_id: String!, name: String, description: String, teamId: String, status: String, priority: Int, labelIds: [String], tagIds: [String], assigneeId: String, startDate: Date, targetDate: Date, cycleId: String, projectId: String, estimatePoint: Int, milestoneId: String): Task
+  removeTask(_id: String!): Task
+}
+
+# ─── Subscriptions ────────────────────────────────────────────────────────────
+
+type Subscription {
+  conversationChanged(conversationId: String!): ConversationChangedResponse
+  conversationMessageInserted(conversationId: String!): ConversationMessage
+  conversationClientTypingStatusChanged(conversationId: String!): ConversationClientTypingStatusChangedResponse
+  conversationAdminMessageInserted(customerId: String!): ConversationAdminMessageInsertedResponse
+  dealChanged(deal: DealSubscription): DealSubscription
+  taskChanged(task: TaskSubscription): TaskSubscription
+  ticketChanged(ticket: TicketSubscription): TicketSubscription
+}
+
+type ConversationClientTypingStatusChangedResponse {
+  conversationId: String!
+  text: String
+}
+
+type ConversationAdminMessageInsertedResponse {
+  customerId: String
+  unreadCount: Int
+}
