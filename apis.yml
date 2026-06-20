@@ -2,7 +2,7 @@ aid: erxes
 name: Erxes
 description: "Open-source experience operating system (XOS) that unifies marketing, sales, operations, and support — replacing tools like HubSpot, Zendesk, and Linear. Provides a GraphQL API covering contacts, companies, conversations, tasks, tickets, deals, team inboxes, and automation workflows."
 type: Index
-image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
 url: https://erxes.io
 baseURL: https://erxes.io
 created: 2026-06-14
