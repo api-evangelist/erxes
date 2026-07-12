@@ -33,6 +33,8 @@ apis:
       - url: graphql/erxes-graphql.md
         type: GraphQL
 common:
+  - type: DomainSecurity
+    url: security/erxes-domain-security.yml
   - url: https://erxes.io
     type: Website
   - url: https://erxes.io/docs/introduction
