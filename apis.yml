@@ -1,23 +1,26 @@
 aid: erxes
 name: Erxes
-description: "Open-source experience operating system (XOS) that unifies marketing, sales, operations, and support — replacing tools like HubSpot, Zendesk, and Linear. Provides a GraphQL API covering contacts, companies, conversations, tasks, tickets, deals, team inboxes, and automation workflows."
+description: "Open-source Experience Operating System (XOS) that unifies marketing, sales, operations and support in one self-hostable platform, positioned as a replacement for HubSpot, Zendesk, Linear and Wix. The machine surface is a GraphQL Federation API served by an Apollo Router gateway — there is no REST API and no OpenAPI — covering contacts, companies, products, tags, documents, brands, organization structure, team members and automations in the core subgraph, plus sales, frontline (inbox/tickets), operation (projects/tasks/cycles) and block plugin subgraphs. Authentication is OAuth 2.0 Device Authorization Grant with per-tenant clients and a documented 34-scope vocabulary. erxes ships the Community Edition under AGPL-3.0 alongside a proprietary Enterprise Edition, publishes its own agent plugin and agent skills, and releases roughly once per merge day."
 type: Index
 accessModel:
-  pricing: unknown
-  onboarding: unknown
-  trial: false
-  try_now: false
-  public: false
-  label: Unknown
-  confidence: low
-  source: []
-  generated: '2026-07-22'
-  method: derived
+  pricing: freemium
+  onboarding: self-service
+  trial: true
+  try_now: true
+  public: true
+  label: Freemium
+  confidence: high
+  source:
+    - https://erxes.io/pricing/self-service/frontline
+    - https://erxes.io/pricing/community-edition
+    - https://erxes.io/auth/signup
+  generated: '2026-08-13'
+  method: searched
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/erxes.png
 url: https://erxes.io
 baseURL: https://erxes.io
 created: 2026-06-14
-modified: 2026-06-14
+modified: 2026-08-13
 specificationVersion: '0.19'
 tags:
   - GraphQL
@@ -26,23 +29,36 @@ tags:
   - Open Source
   - Marketing Automation
   - Sales Pipeline
+  - Help Desk
+  - Ticketing
+  - Team Inbox
+  - Self-Hosted
+  - Apollo Federation
+  - Project Management
+  - Knowledge Base
+  - Webhooks
+  - Agent Skills
 apis:
   - aid: erxes:graphql-api
     name: Erxes GraphQL API
-    description: "GraphQL Federation API powering the Erxes XOS platform. Built on Apollo Router with microservices architecture, it exposes endpoints for contacts, companies, conversations, tickets, tasks, deals, automations, pipelines, and team inboxes. The API Gateway runs on port 4000 in self-hosted deployments."
+    description: "GraphQL Federation API powering the erxes XOS platform. An Apollo Router gateway federates one subgraph per plugin — core (contacts, companies, products, tags, documents, brands, organization structure, team members, automations, permissions, notifications), sales (deals, pipelines, stages), frontline (conversations, tickets, integrations, knowledge base, forms), operation (projects, tasks, triage, teams, statuses, cycles, milestones) and block (buildings, floor zonings, units, opportunities, contracts, invoices). Core types carry Apollo Federation @key(fields: \"_id\"). Calls are POSTed to <gateway>/graphql with a Bearer access token and an erxes-subdomain tenant header. Introspection is disabled on the gateway."
     tags:
       - GraphQL
       - CRM
       - Contacts
       - Conversations
       - Automation
+      - Apollo Federation
+      - OAuth
     humanURL: https://erxes.io/docs/introduction
-    baseURL: https://erxes.io
+    baseURL: https://{subdomain}.next.erxes.io/gateway/graphql
     properties:
       - url: https://erxes.io/docs/introduction
         type: Documentation
       - url: graphql/erxes-graphql.md
         type: GraphQL
+      - url: graphql/erxes-schema.graphql
+        type: GraphQLSchema
 common:
   - type: DomainSecurity
     url: security/erxes-domain-security.yml
@@ -50,18 +66,87 @@ common:
     type: Website
   - url: https://erxes.io/docs/introduction
     type: Documentation
+  - url: https://docs.erxes.io/
+    type: DeveloperPortal
+  - url: https://docs.erxes.io/self-hosting
+    type: GettingStarted
+  - url: https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/erxes-graphql-api.md
+    type: APIReference
   - url: https://www.linkedin.com/company/erxes
     type: LinkedIn
+  - url: https://twitter.com/erxeshq
+    type: Twitter
   - url: https://github.com/erxes
     type: GitHubOrganization
+  - url: https://erxes.io/blogs
+    type: Blog
+  - url: https://erxes.io/discussions
+    type: Support
+  - url: https://discord.com/invite/aaGzy3gQK5
+    type: Community
+  - url: https://erxes.io/roadmap
+    type: Roadmap
   - url: https://erxes.io/pricing/self-service/frontline
     type: Pricing
+  - url: https://erxes.io/auth/signup
+    type: SignUp
+  - url: https://erxes.io/auth/login
+    type: Login
+  - url: https://erxes.io/legal/terms
+    type: TermsOfService
+  - url: https://erxes.io/legal/privacy
+    type: PrivacyPolicy
+  - url: https://status.erxes.io
+    type: StatusPage
+  - url: https://github.com/erxes/erxes/blob/main/SECURITY.md
+    type: Security
+  - url: security/erxes-vulnerability-disclosure.yml
+    type: VulnerabilityDisclosure
   - url: plans/erxes-plans.md
     type: Plans
-  - url: rate-limits/erxes-rate-limits.md
+  - url: plans/erxes-plans-pricing.yml
+    type: Plans
+  - url: rate-limits/erxes-rate-limits.yml
     type: RateLimits
   - url: finops/erxes-finops.md
     type: FinOps
+  - url: packages/erxes-packages.yml
+    type: Packages
+  - url: packages/erxes-packages.yml
+    type: SDKs
+  - url: cli/erxes-cli.yml
+    type: CLI
+  - url: components/erxes-components.yml
+    type: Components
+  - url: authentication/erxes-authentication.yml
+    type: Authentication
+  - url: scopes/erxes-scopes.yml
+    type: OAuthScopes
+  - url: conventions/erxes-conventions.yml
+    type: Conventions
+  - url: errors/erxes-error-codes.yml
+    type: ErrorCatalog
+  - url: lifecycle/erxes-lifecycle.yml
+    type: Lifecycle
+  - url: changelog/erxes-changelog.yml
+    type: ChangeLog
+  - url: https://github.com/erxes/erxes/blob/main/CHANGELOG.md
+    type: ReleaseNotes
+  - url: conformance/erxes-conformance.yml
+    type: Conformance
+  - url: data-model/erxes-data-model.yml
+    type: DataModel
+  - url: asyncapi/erxes-webhooks.yml
+    type: Webhooks
+  - url: skills/_index.yml
+    type: AgentSkill
+  - url: llms/erxes-llms.txt
+    type: LLMsTxt
 maintainers:
   - FN: Kin Lane
     email: kin@apievangelist.com
+x-enrichment:
+  date: '2026-08-13'
+  status: enriched
+  artifacts_added: 24
+  pass: local-v1
