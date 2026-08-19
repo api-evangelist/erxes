@@ -1,0 +1,102 @@
+generated: '2026-08-13'
+method: derived
+status: candidate
+source: >-
+  https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/erxes-graphql-api.md
+note: >-
+  erxes SHIPS NO MCP SERVER. Searched the erxes GitHub organization (41
+  repositories), the 11,527-file monorepo tree (zero matches for "mcp"), the
+  docs, and the web. What erxes does ship is a first-class agent surface in a
+  DIFFERENT protocol: an OpenClaw/Clawhub agent plugin ("erxes-next-plugin"
+  v1.0.23) published at github.com/erxes/erxes-skills, saved verbatim in
+  skills/ and wired as AgentSkill. Because no MCP server exists, `mode: none`
+  and NO `MCPServer` pointer is wired into apis.yml — asserting one would
+  credit erxes with an agent surface it has not shipped. The tools[] list below
+  is a CANDIDATE derived from the operations erxes itself publishes in its
+  agent-plugin GraphQL reference; every tool maps to a real, documented GraphQL
+  operation and a real OAuth scope. Nothing here is invented, and nothing here
+  is live.
+deployment:
+  mode: none
+  endpoint: null
+  install: null
+  package: null
+  auth: oauth
+  verified: searched
+  note: >-
+    A future erxes MCP server would front the same gateway
+    (https://<subdomain>.next.erxes.io/gateway/graphql or a self-hosted
+    equivalent) behind the OAuth 2.0 device flow already documented in
+    authentication/erxes-authentication.yml. No endpoint is guessed here.
+existing_agent_surface:
+  protocol: OpenClaw / Clawhub agent-plugin (schemaVersion 1)
+  name: erxes-next-plugin
+  version: 1.0.23
+  repository: https://github.com/erxes/erxes-skills
+  entry: instructions.md
+  auth: oauth-device-flow (confidential client)
+  required_env: [ERXES_BASE_URL, ERXES_CLIENT_ID, ERXES_CLIENT_SECRET, ERXES_AUTH_DURATION]
+  artifact: skills/_index.yml
+  note: >-
+    Not MCP. It is a markdown-instruction plugin plus a Node session manager
+    (scripts/erxes-auth.mjs) that the agent shells out to; there is no
+    tools/list, no JSON-RPC transport, and no inputSchema per tool.
+server:
+  name: erxes
+  transport: null
+  url: null
+tools:
+  - {name: list_customers, description: 'List and search customers.', source_operation: 'graphql#Query.customers', scope: 'contacts:read'}
+  - {name: get_customer, description: 'View one customer in detail.', source_operation: 'graphql#Query.customerDetail', scope: 'contacts:read'}
+  - {name: create_customer, description: 'Create a customer.', source_operation: 'graphql#Mutation.customersAdd', scope: 'contacts:create'}
+  - {name: update_customer, description: 'Edit customer information.', source_operation: 'graphql#Mutation.customersEdit', scope: 'contacts:update'}
+  - {name: delete_customer, description: 'Delete customers.', source_operation: 'graphql#Mutation.customersRemove', scope: 'contacts:remove'}
+  - {name: merge_customers, description: 'Merge duplicate customer records.', source_operation: 'graphql#Mutation.customersMerge', scope: 'contacts:merge'}
+  - {name: list_companies, description: 'List and search companies.', source_operation: 'graphql#Query.companies', scope: 'contacts:read'}
+  - {name: get_company, description: 'View one company in detail.', source_operation: 'graphql#Query.companyDetail', scope: 'contacts:read'}
+  - {name: list_products, description: 'List products.', source_operation: 'graphql#Query.products', scope: 'products:read'}
+  - {name: create_product, description: 'Create a product.', source_operation: 'graphql#Mutation.productsAdd', scope: 'products:create'}
+  - {name: update_product, description: 'Edit a product.', source_operation: 'graphql#Mutation.productsEdit', scope: 'products:update'}
+  - {name: delete_product, description: 'Delete a product.', source_operation: 'graphql#Mutation.productsRemove', scope: 'products:remove'}
+  - {name: merge_products, description: 'Merge duplicate products.', source_operation: 'graphql#Mutation.productsMerge', scope: 'products:merge'}
+  - {name: create_product_category, description: 'Create a product category.', source_operation: 'graphql#Mutation.productCategoriesAdd', scope: 'products:create'}
+  - {name: create_uom, description: 'Create a unit of measure.', source_operation: 'graphql#Mutation.uomsAdd', scope: 'products:manage'}
+  - {name: list_tags, description: 'List tags.', source_operation: 'graphql#Query.tags', scope: 'tags:read'}
+  - {name: create_tag, description: 'Create a tag.', source_operation: 'graphql#Mutation.tagsAdd', scope: 'tags:create'}
+  - {name: update_tag, description: 'Edit a tag.', source_operation: 'graphql#Mutation.tagsEdit', scope: 'tags:update'}
+  - {name: delete_tag, description: 'Delete a tag.', source_operation: 'graphql#Mutation.tagsRemove', scope: 'tags:remove'}
+  - {name: attach_tag, description: 'Attach a tag to an object.', source_operation: 'graphql#Mutation.tagsTag', scope: 'tags:tag'}
+  - {name: list_documents, description: 'List documents.', source_operation: 'graphql#Query.documents', scope: 'documents:read'}
+  - {name: save_document, description: 'Create or edit a document.', source_operation: 'graphql#Mutation.documentsSave', scope: 'documents:create + documents:update'}
+  - {name: delete_document, description: 'Delete a document.', source_operation: 'graphql#Mutation.documentsRemove', scope: 'documents:remove'}
+  - {name: list_brands, description: 'List brands.', source_operation: 'graphql#Query.brands', scope: 'brands:read'}
+  - {name: create_brand, description: 'Create a brand.', source_operation: 'graphql#Mutation.brandsAdd', scope: 'brands:create'}
+  - {name: update_brand, description: 'Edit a brand.', source_operation: 'graphql#Mutation.brandsEdit', scope: 'brands:update'}
+  - {name: delete_brand, description: 'Delete a brand.', source_operation: 'graphql#Mutation.brandsRemove', scope: 'brands:remove'}
+  - {name: get_org_structure, description: 'Read the organization structure — departments, branches, units.', source_operation: 'graphql#Query.structures', scope: 'organization:read'}
+  - {name: create_department, description: 'Create a department.', source_operation: 'graphql#Mutation.departmentsAdd', scope: 'organization:manage'}
+  - {name: create_branch, description: 'Create a branch.', source_operation: 'graphql#Mutation.branchesAdd', scope: 'organization:manage'}
+  - {name: list_team_members, description: 'List team members.', source_operation: 'graphql#Query.users', scope: 'teamMembers:read'}
+  - {name: invite_team_member, description: 'Invite a new team member.', source_operation: 'graphql#Mutation.usersInvite', scope: 'teamMembers:create'}
+  - {name: update_team_member, description: 'Edit a team member.', source_operation: 'graphql#Mutation.usersEdit', scope: 'teamMembers:update'}
+  - {name: deactivate_team_member, description: 'Deactivate a team member.', source_operation: 'graphql#Mutation.usersSetActiveStatus', scope: 'teamMembers:remove'}
+  - {name: list_automations, description: 'List automations.', source_operation: 'graphql#Query.automations', scope: 'automations:read'}
+  - {name: create_automation, description: 'Create an automation.', source_operation: 'graphql#Mutation.automationsAdd', scope: 'automations:create'}
+  - {name: update_automation, description: 'Edit an automation.', source_operation: 'graphql#Mutation.automationsEdit', scope: 'automations:update'}
+  - {name: delete_automation, description: 'Delete an automation.', source_operation: 'graphql#Mutation.automationsRemove', scope: 'automations:delete'}
+tool_count: 38
+input_schemas:
+  available: false
+  reason: >-
+    A real inputSchema per tool would come from GraphQL introspection, which
+    erxes has disabled on its gateway (INTROSPECTION_DISABLED). Argument shapes
+    for the core operations can be read from graphql/erxes-schema.graphql,
+    which was harvested from the erxes source rather than from a live schema.
+crosswalk:
+  emitted: false
+  reason: >-
+    mcp/<slug>-tool-crosswalk.yml binds MCP tools to backing OpenAPI
+    operationIds. erxes has neither an MCP server nor an OpenAPI, so there are
+    no two surfaces to reconcile. The scope-to-operation binding that would
+    otherwise live in a crosswalk is already carried on each tool above and in
+    scopes/erxes-scopes.yml.

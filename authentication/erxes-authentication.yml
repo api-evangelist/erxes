@@ -1,0 +1,101 @@
+generated: '2026-08-13'
+method: searched
+source: >-
+  https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/erxes-app-token-auth.md
+docs:
+  - https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/erxes-app-token-auth.md
+  - https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/instructions.md
+  - https://github.com/erxes/erxes-cli#authenticate
+note: >-
+  erxes publishes no OpenAPI, so 0-working/derive-authentication.py produced no
+  profile (0 spec-bearing files). This profile is SEARCHED from the provider's
+  own published agent-plugin auth reference and the first-party CLI README,
+  both of which document the same OAuth 2.0 Device Authorization Grant against
+  the erxes gateway. Two client types are documented and they are not
+  interchangeable: the agent plugin requires a CONFIDENTIAL client (client
+  secret required, sent as `client_secret` in the OAuth JSON body / the
+  `oauth_secret` header), while the CLI uses a PUBLIC client (client id only).
+summary:
+  types: [oauth2, http]
+  api_key_in: []
+  oauth2_flows: [deviceCode]
+  transport: GraphQL over HTTPS POST
+  multi_tenant: true
+schemes:
+  - name: OAuth2 Device Authorization Grant (confidential client)
+    type: oauth2
+    flow: urn:ietf:params:oauth:grant-type:device_code
+    rfc: RFC 8628
+    client_type: confidential
+    client_credentials_required: [client_id, client_secret]
+    client_secret_transport: >-
+      sent as `client_secret` in the OAuth JSON body; the plugin manifest also
+      declares a `clientSecretHeader: oauth_secret`
+    token_type: Bearer
+    access_token_ttl_seconds: 28800
+    device_code_ttl_seconds: 600
+    refresh_token: rotating — a new refresh token is issued on every refresh
+    error_on_missing_secret: invalid_client
+    client_registration: erxes Settings > OAuth Clients (per tenant, in-product)
+    used_by: erxes-next-plugin (github.com/erxes/erxes-skills)
+    sources:
+      - https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/erxes-app-token-auth.md
+  - name: OAuth2 Device Authorization Grant (public client)
+    type: oauth2
+    flow: urn:ietf:params:oauth:grant-type:device_code
+    rfc: RFC 8628
+    client_type: public
+    client_credentials_required: [client_id]
+    token_type: Bearer
+    used_by: erxes CLI (`erxes login --host <gateway> --client-id <id>`)
+    note: >-
+      The CLI requires the OAuth client to explicitly enable the public
+      operations it calls, e.g. core.contacts.customers.list.v1,
+      core.contacts.customers.detail.v1, core.contacts.customers.create.v1.
+    sources:
+      - https://github.com/erxes/erxes-cli#authenticate
+  - name: Bearer token on GraphQL calls
+    type: http
+    scheme: bearer
+    header: 'Authorization: Bearer <accessToken>'
+    applies_to: 'POST <gateway>/graphql'
+    sources:
+      - https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/erxes-graphql-api.md
+  - name: Tenant selector header
+    type: apiKey
+    in: header
+    parameter_name: erxes-subdomain
+    required: true
+    applies_to: GraphQL calls only
+    note: >-
+      NOT a credential — it selects the tenant. erxes explicitly documents that
+      OAuth token and refresh requests must NOT send `erxes-subdomain` (the
+      gateway infers the tenant from the host); the value returned as
+      `subdomain` in the login response is then sent on every GraphQL call.
+      Sending it on the OAuth endpoints is a documented failure mode.
+    sources:
+      - https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/instructions.md
+  - name: JWT session login (interactive users)
+    type: http
+    scheme: bearer
+    bearerFormat: JWT
+    obtained_via: '`login` GraphQL mutation (email/password), Google OAuth, or magic link'
+    note: >-
+      The interactive/app login path, distinct from the machine OAuth device
+      flow above. Documented in graphql/erxes-graphql.md in this repo and in
+      the erxes source.
+    sources:
+      - graphql/erxes-graphql.md
+session_handling:
+  persistence: >-
+    The erxes agent plugin persists the OAuth session in a home-based state
+    directory (mode 0700 dir / 0600 files) outside the source tree; the CLI
+    stores profile config and credentials separately under the same modes.
+  duration_options: ['3m', '6m', '1y']
+  default_duration: 6m
+  silent_refresh: true
+  session_key: base URL + client id
+  secret_rotation: >-
+    rotating only the client secret keeps the session and is adopted on the
+    next refresh; changing base URL or client id forces a fresh login
+scopes_artifact: scopes/erxes-scopes.yml

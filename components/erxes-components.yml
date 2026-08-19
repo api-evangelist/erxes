@@ -1,0 +1,106 @@
+generated: '2026-08-13'
+method: searched
+source: https://erxes.io/docs/erxes-messenger
+docs:
+  - https://erxes.io/docs/erxes-messenger
+  - https://github.com/erxes/erxes/tree/main/apps/frontline-widgets
+note: >-
+  erxes' client-side surface is the Frontline widget family — an embeddable
+  messenger and embeddable/modal forms — plus native messenger SDKs for iOS,
+  Android, React Native and Flutter. These are distinct from the CLI and the
+  server-side surface: they render erxes UI inside a customer's own app or
+  site. The web embed snippet is GENERATED PER TENANT in the erxes dashboard
+  (Settings > Appstore > select messenger > "install code"); erxes publishes no
+  public CDN URL for it, so the configuration contract below is recorded from
+  the open-source widget demo page rather than from a copyable script tag.
+families:
+  - family: web-messenger
+    name: erxes Messenger widget
+    kind: embedded chat widget
+    distribution: >-
+      dashboard-generated script snippet, served by the widgets service (port
+      3200 in the published self-hosted layout). No public CDN URL and no
+      versioned bundle URL is published.
+    install: 'Settings > Appstore > select your messenger > "install code" > paste at the bottom of the <body> tag'
+    variants: [standard, single-page-app]
+    loader: messengerBundle.js
+    configuration:
+      global: window.erxesSettings
+      shape: |
+        window.erxesSettings = {
+          messenger: { integrationId: '<integration-id>' }
+        };
+    capabilities:
+      - real-time chat over WebSocket (graphql-ws) with auto-reconnect
+      - bot conversations with typing indicators
+      - knowledge base browsing and search
+      - support ticket creation and tracking
+      - optional end-user identification
+      - image upload
+    source: https://github.com/erxes/erxes/tree/main/apps/frontline-widgets
+  - family: web-forms
+    name: erxes Form / pop-up widget
+    kind: embedded and modal lead-capture forms
+    distribution: dashboard-generated script snippet (same widgets service)
+    loader: formBundle.js
+    configuration:
+      global: window.erxesSettings
+      shape: |
+        window.erxesSettings = {
+          forms: [{ form_id: '<form-id>', channel_id: '<channel-id>' }]
+        };
+      mount_attributes:
+        - {attribute: 'data-erxes-embed="<form-id>"', description: 'render the form inline at this element'}
+        - {attribute: 'data-erxes-modal="<form-id>"', description: 'render the form in a modal opened by the element inside'}
+    source: https://github.com/erxes/erxes/blob/main/apps/frontline-widgets/src/demo.html
+  - family: native-messenger-sdks
+    name: erxes Messenger native SDKs
+    kind: mobile in-app messenger
+    note: >-
+      Same messenger surface as the web widget, shipped as native libraries.
+      Each requires an erxes backend endpoint plus an integration id from
+      Dashboard > Settings > Integrations. Registry currency and the caveats on
+      each (Android not actually on Maven Central; the Flutter package is
+      published from a personal repo) are recorded in
+      packages/erxes-packages.yml.
+    members:
+      - platform: ios
+        name: MessengerSDK
+        repository: https://github.com/erxes/erxes-ios-sdk
+        version: 0.30.14
+        requires: 'iOS 16+, Swift 5.9+'
+        configure: |
+          MessengerSDK.configure(
+            MessengerConfig(
+              endpoint: "https://your.erxes.instance",
+              integrationId: "YOUR_INTEGRATION_ID"
+            )
+          )
+        display_modes: [classic]
+      - platform: android
+        name: 'com.erxes:messenger-sdk'
+        repository: https://github.com/erxes/erxes-android-sdk
+        version: 0.30.5
+        requires: 'Android 7.0 (API 24)+, Kotlin, Jetpack Compose'
+        configure: 'ErxesMessenger.configure(context, MessengerConfig(...))'
+        status: 'in development (provider-stated)'
+      - platform: react-native
+        name: rn-erxes-sdk
+        repository: https://github.com/erxes/rn-erxes-sdk
+        version: 0.5.2
+        registry: npm
+      - platform: flutter
+        name: erxes_flutter_sdk
+        repository: https://github.com/erxes/flutter-erxes-sdk
+        version: 0.3.0
+        registry: pub.dev
+        caveat: 'the pub.dev listing is published from a personal repository, not the erxes org'
+gaps:
+  - >-
+    No public, versioned CDN bundle for the web widgets. A site owner cannot
+    pin the widget version they are loading, and neither can anyone auditing
+    the page.
+  - >-
+    erxes publishes no standalone component/element reference — the embed
+    contract above is only visible in the open-source demo page.
+package_reference: packages/erxes-packages.yml

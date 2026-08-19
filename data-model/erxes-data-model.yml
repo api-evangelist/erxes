@@ -1,0 +1,149 @@
+generated: '2026-08-13'
+method: derived
+source: graphql/erxes-schema.graphql
+note: >-
+  Derived from the harvested GraphQL SDL, not from an OpenAPI (erxes publishes
+  none). Relationships are read two ways, both visible in the schema: an
+  explicit resolved field whose type is another entity (Customer.owner: User),
+  and an id-reference scalar field (Customer.ownerId: String). Where both exist
+  the pair is recorded with `via`. Only entities present in the harvested SDL
+  are listed; the schema covers the erxes CORE subgraph (128 types), so plugin
+  subgraphs — sales deals, frontline tickets/conversations, operation
+  tasks/projects, block units — are named under `federated_subgraphs` rather
+  than modelled, because their SDL is not in this repo.
+identity:
+  primary_key: _id
+  key_type: String (MongoDB ObjectId string)
+  id_prefixes: none — erxes uses opaque ObjectId strings with no type prefix
+  federation_key: '@key(fields: "_id")'
+  note: >-
+    Because ids carry no type prefix, an id alone does not tell a caller (or an
+    agent) which entity it addresses. The provider's own agent instructions
+    compensate by requiring a search/list step before any write that takes an
+    _id.
+entities:
+  - name: Customer
+    description: A contact — person-level record. The center of the contacts domain.
+    key: _id
+    cache_control_max_age: 3
+    scalar_fields: [state, createdAt, updatedAt, avatar, firstName, lastName, middleName, birthDate, sex, primaryEmail, emails, primaryPhone, phones, primaryAddress, addresses, leadStatus, hasAuthority, description, isSubscribed, code, emailValidationStatus, phoneValidationStatus, status, isOnline, lastSeenAt, sessionCount, score, position, department]
+    json_fields: [primaryAddress, addresses, location, visitorContactInfo, trackedData, propertiesData, urlVisits, links]
+    relationships:
+      - {type: belongs_to, target: User, via: ownerId, resolved_field: owner}
+      - {type: has_many, target: Company, via: null, resolved_field: companies}
+      - {type: has_many, target: Tag, via: tagIds, resolved_field: getTags}
+      - {type: belongs_to, target: Integration, via: integrationId, note: 'integration type is defined in the frontline subgraph, not in this SDL'}
+  - name: Company
+    description: An organization-level contact record.
+    key: _id
+    cache_control_max_age: 3
+    scalar_fields: [createdAt, updatedAt, avatar, size, website, industry, primaryName, names, primaryEmail, emails, primaryPhone, phones, status, businessType, description, isSubscribed, code, location, score]
+    json_fields: [primaryAddress, addresses, trackedData, propertiesData, links]
+    relationships:
+      - {type: belongs_to, target: User, via: ownerId, resolved_field: owner}
+      - {type: belongs_to, target: Company, via: parentCompanyId, resolved_field: parentCompany, note: 'self-referencing hierarchy'}
+      - {type: has_many, target: Customer, via: null, resolved_field: customers}
+      - {type: has_many, target: Tag, via: tagIds, resolved_field: getTags}
+      - {type: has_many, target: Company, via: mergedIds, note: 'records absorbed by a merge'}
+  - name: User
+    description: A team member / internal user.
+    key: _id
+    cache_control_max_age: 3
+    scalar_fields: [createdAt, username, email, isActive, score, leaderBoardPosition, employeeId, isOnboarded]
+    relationships:
+      - {type: has_one, target: UserDetailsType, via: null, resolved_field: details}
+      - {type: has_many, target: Department, via: null, resolved_field: departments}
+      - {type: has_many, target: Branch, via: branchIds, resolved_field: branches}
+      - {type: has_many, target: Position, via: positionIds, resolved_field: positions}
+      - {type: belongs_to, target: Unit, via: unitId}
+  - name: Branch
+    description: A physical or organizational branch in the org structure.
+    key: _id
+    relationships:
+      - {type: belongs_to, target: Branch, via: parentId, resolved_field: parent, note: 'self-referencing tree'}
+      - {type: has_many, target: User, via: userIds, resolved_field: users}
+      - {type: has_many, target: User, via: supervisorId, resolved_field: supervisors}
+  - name: Department
+    description: A department in the org structure.
+    key: _id
+    relationships:
+      - {type: belongs_to, target: Department, via: parentId, resolved_field: parent, note: 'self-referencing tree'}
+      - {type: has_many, target: User, via: userIds, resolved_field: users}
+      - {type: has_many, target: User, via: supervisorId, resolved_field: supervisors}
+  - name: Position
+    description: A job position in the org structure.
+    key: _id
+    relationships:
+      - {type: belongs_to, target: Position, via: parentId, note: 'self-referencing tree'}
+      - {type: has_many, target: User, via: userIds, resolved_field: users}
+  - name: Tag
+    description: A polymorphic label attachable to any tagged object type.
+    key: _id
+    scalar_fields: [name, colorCode, isGroup, description, type, order, objectCount, totalObjectCount, createdAt]
+    relationships:
+      - {type: belongs_to, target: Tag, via: parentId, note: 'self-referencing tree'}
+      - {type: has_many, target: 'polymorphic', via: relatedIds, note: 'the `type` field names the tagged content type; tagsGetTypes enumerates them'}
+  - name: Segment
+    description: A saved, condition-based selection over a content type.
+    key: _id
+    scalar_fields: [contentType, name, description, color, conditions, conditionsConjunction, shouldWriteActivityLog]
+    relationships:
+      - {type: belongs_to, target: Segment, via: subOf, resolved_field: getSubSegments, note: 'self-referencing tree'}
+      - {type: polymorphic, target: 'any', via: contentType}
+  - name: Organization
+    description: The tenant/workspace record.
+    key: _id
+  - name: OAuthClientApp
+    description: An OAuth client registered in Settings > OAuth Clients; the credential behind every machine integration.
+    key: _id
+    relationships:
+      - {type: has_many, target: 'scope', via: null, note: 'scope vocabulary in scopes/erxes-scopes.yml'}
+  - name: PermissionGroup
+    description: A named bundle of permissions granted to users.
+    key: _id
+    relationships:
+      - {type: has_many, target: UserPermission}
+      - {type: has_many, target: PermissionModule}
+  - name: Notification
+    description: An in-app / email notification.
+    key: _id
+    relationships:
+      - {type: has_one, target: EmailDelivery}
+      - {type: belongs_to, target: NotificationModule}
+  - name: Product
+    description: A catalog product. Operations are published in the agent-plugin reference; the full type is defined in the sales subgraph.
+    key: _id
+    modelled: partial
+  - name: Brand
+    description: A brand that scopes integrations and channels.
+    key: _id
+    modelled: partial
+  - name: Automation
+    description: A trigger/action workflow. Actions include incoming and outgoing webhooks.
+    key: _id
+    modelled: partial
+    relationships:
+      - {type: has_many, target: Trigger}
+entity_count_modelled: 15
+type_count_in_sdl: 128
+federated_subgraphs:
+  note: >-
+    Each erxes plugin exposes its own subgraph, federated into one gateway
+    schema. These entities are real and their operations are documented in the
+    provider's agent-plugin references, but their SDL is not in
+    graphql/erxes-schema.graphql, so they are named rather than modelled.
+  subgraphs:
+    - {name: core, modelled: true, entities: [Customer, Company, User, Branch, Department, Position, Tag, Segment, Organization, OAuthClientApp, PermissionGroup, Notification]}
+    - {name: sales_api, modelled: false, entities: [Deal, Pipeline, Stage, Product, ProductCategory, Uom]}
+    - {name: frontline_api, modelled: false, entities: [Conversation, Ticket, Integration, Channel, KnowledgeBase, Form]}
+    - {name: operation_api, modelled: false, entities: [Project, Task, Triage, Team, Status, Cycle, Milestone, Note, Activity, Template], reference: skills/erxes-operation-plugin-workflows.md}
+    - {name: block_api, modelled: false, entities: [Project, Building, FloorZoning, Unit, UnitType, Opportunity, Status, PaymentPlan, Contract, Offer, Invoice], reference: skills/erxes-block-plugin-workflows.md}
+    - {name: loyalty_api, modelled: false}
+    - {name: payment_api, modelled: false}
+polymorphism:
+  note: >-
+    Tag and Segment are both polymorphic over a `type`/`contentType` string
+    rather than over a union. `tagsGetTypes` returns the live list of taggable
+    content types, which is the only way to enumerate them — the vocabulary is
+    not published statically.
+render: null

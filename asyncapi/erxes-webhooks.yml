@@ -1,0 +1,103 @@
+generated: '2026-08-13'
+method: searched
+source: https://github.com/erxes/erxes/tree/main/backend/services/automations/src/executions/actions/webhook
+spec_type: none
+asyncapi_published: false
+note: >-
+  erxes publishes NO AsyncAPI document — searched the docs, the GitHub
+  organization, /asyncapi.yaml on every host and the monorepo tree (11,527
+  files, zero matches for "asyncapi"). It DOES ship a real, bidirectional event
+  surface, captured here as a webhook catalog: incoming webhooks that trigger
+  an automation, outgoing webhooks that an automation fires, and GraphQL
+  subscriptions over WebSocket for live UI. Everything below is read from the
+  open-source implementation, not inferred. `type: Webhooks` is wired; no
+  `type: AsyncAPI` pointer is emitted, because no AsyncAPI document exists.
+surfaces:
+  - id: incoming-webhooks
+    direction: inbound
+    name: Automation incoming webhooks
+    description: >-
+      An automation can be triggered by an inbound HTTP call. The automations
+      service mounts an express router at /automation; each configured webhook
+      gets an id and accepts any method on its path. The raw body is preserved
+      for signature verification.
+    mount: /automation
+    routes:
+      - path: '/automation/:id/health'
+        methods: [GET]
+        description: 'Health check for a configured webhook. Declared before the catch-all so it is not swallowed by it.'
+        rate_limited: false
+      - path: '/automation/:id/*'
+        methods: [ALL]
+        description: 'Trigger the automation bound to this webhook id.'
+        rate_limit: {window: 60s, max: 100, key: 'client IP + webhook id'}
+      - path: '/automation/:executionId/:actionId/continue/*'
+        methods: [ALL]
+        description: 'Resume an automation execution that is parked waiting on an external callback.'
+        rate_limit: {window: 60s, max: 20, key: 'client IP + execution id'}
+    payload_limit: 1mb
+    signature_verification: 'raw body is captured on the request (req.rawBody) so a signature can be verified; erxes publishes no signature scheme or header name'
+    security_headers:
+      helmet: true
+      csp: "default-src 'none'; frame-ancestors 'none'"
+      hsts: 'max-age=31536000; includeSubDomains; preload'
+      hide_powered_by: true
+    source: backend/services/automations/src/executions/actions/webhook/incoming/
+  - id: outgoing-webhooks
+    direction: outbound
+    name: Automation outgoing webhooks
+    description: >-
+      An automation action that calls an external HTTP endpoint. Method, URL,
+      headers, query and body are configured in the automation builder, with
+      output placeholders substituted from earlier steps.
+    configuration:
+      - method
+      - url
+      - headers
+      - query string
+      - body (with output placeholders)
+      - auth config (attachAuth)
+      - retry options
+    retry:
+      retryable_status_codes: [408, 425, 429, 500, 502, 503, 504]
+      strategy: exponential backoff
+      recorded: 'attemptCount is stored in the result meta'
+    failure_phases: [build, network, timeout, response-parse]
+    error_codes: errors/erxes-error-codes.yml
+    response_capture: 'status, statusText, ok, headers, contentType, bodyText and bodyJson (when the content-type is JSON) are all recorded on the execution'
+    source: backend/services/automations/src/executions/actions/webhook/outgoing/
+  - id: graphql-subscriptions
+    direction: server-push
+    name: GraphQL subscriptions
+    description: >-
+      The Apollo gateway federates subscriptions across plugin subgraphs;
+      clients connect over WebSocket with graphql-ws. This is the transport
+      behind live inbox conversations, notifications, POS orders/slots and the
+      messenger widget's real-time chat.
+    transport: WebSocket (graphql-ws)
+    known_channels:
+      - {module: notifications, source: backend/core-api/src/modules/notifications/graphql/schema/subscription.ts}
+      - {module: frontline messenger widget, source: apps/frontline-widgets/src/app/messenger/graphql/subscriptions.ts}
+      - {module: pos orders, source: apps/posclient-front/modules/orders/graphql/subscriptions.ts}
+      - {module: pos slots, source: apps/posclient-front/modules/slots/graphql/subscriptions.ts}
+    gateway: backend/gateway/src/subscription/
+    note: >-
+      erxes publishes no subscription catalog. The channel list above is what
+      is visible in the open-source tree, not a documented contract.
+  - id: platform-webhook-integrations
+    direction: inbound
+    name: Third-party webhook receivers
+    description: >-
+      erxes also receives webhooks from platforms it integrates with — inbox
+      channels, telephony/call, and GitHub — but these are integration
+      plumbing, not a public event contract for erxes consumers.
+    handlers:
+      - backend/plugins/frontline_api/src/modules/inbox/webhooks.ts
+      - backend/plugins/frontline_api/src/modules/integrations/call/webhookAuth.ts
+      - backend/plugins/operation_api/src/utils/githubWebhookHandler.ts
+event_catalog_published: false
+gaps:
+  - 'No AsyncAPI document, no event schema registry, and no published event-type list.'
+  - 'No documented signature header or verification scheme for incoming webhooks, even though the raw body is captured for exactly that purpose.'
+  - 'No published subscription/channel reference for the GraphQL WebSocket surface.'
+  - 'Webhook surfaces are self-hosted deployment endpoints; erxes does not publish a hosted event endpoint.'

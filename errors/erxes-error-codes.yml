@@ -1,0 +1,111 @@
+generated: '2026-08-13'
+method: searched
+source: >-
+  https://github.com/erxes/erxes/blob/main/backend/erxes-api-shared/src/core-modules/automations/constants.ts
+format: typed-code-registry
+rfc9457: false
+note: >-
+  erxes publishes no OpenAPI, so there are no 4xx/5xx response objects to
+  derive a problem-type catalog from. What erxes DOES publish is a typed error
+  registry in its open-source backend — AUTOMATION_ERROR_CODES, plus a
+  documented resolution order — and the GraphQL error envelope. Both are
+  captured here verbatim from the source. This is the non-payments sibling of a
+  decline-code catalog. Codes below are copied exactly; the "meaning" column is
+  read from the surrounding code and comments, not invented.
+envelope:
+  graphql:
+    shape: '{"errors":[{"message": string, "extensions": {"code": string, ...}}]}'
+    caveat: 'a GraphQL error can arrive with HTTP 200 — do not treat 200 as success'
+    observed:
+      - {message: 'introspection has been disabled', code: INTROSPECTION_DISABLED, http_status: 200}
+      - {message: 'Invalid GraphQL request', http_status: 400}
+  automation:
+    shape: 'AutomationActionError { message, errorCode }'
+    field: errorCode
+    source: backend/services/automations/src/executions/errorCodes.ts
+resolution_order:
+  note: >-
+    erxes documents the precedence explicitly and states the reason: "No
+    message patterns are matched here — rewording an error must never move it
+    to another bucket."
+  order:
+    - 1: 'explicit errorCode on an AutomationActionError'
+    - 2: 'the outgoing-webhook failure phase (timeout / network / response-parse / build)'
+    - 3: 'the shared error classifier category (PROVIDER / SYSTEM / EXPECTED)'
+    - 4: 'UNKNOWN'
+error_codes:
+  - code: CONFIG_INVALID
+    group: explicit
+    meaning: 'Automation action configuration is invalid; also the code assigned to an outgoing-webhook failure in the `build` phase (the request could not be constructed).'
+    remediation: 'Fix the action configuration — URL, headers, body template, or auth config on the webhook action.'
+  - code: NOT_FOUND
+    group: explicit
+    meaning: 'A record the automation action referenced does not exist.'
+    remediation: 'Resolve the target _id before running the action; do not pass a name where an _id is expected.'
+  - code: PLUGIN_NOT_ENABLED
+    group: explicit
+    meaning: 'The action belongs to a plugin that is not enabled in this deployment.'
+    remediation: 'Enable the plugin in Settings, or remove the action from the automation.'
+  - code: PLUGIN_ACTION_FAILED
+    group: explicit
+    meaning: 'A plugin-provided automation action failed inside the plugin.'
+    remediation: 'Check the plugin service logs; the underlying cause is plugin-specific.'
+  - code: AI_AGENT_FAILED
+    group: explicit
+    meaning: 'An AI-agent automation action failed.'
+    remediation: 'Check the AI agent configuration and the upstream model provider.'
+  - code: WORKFLOW_DEPTH_EXCEEDED
+    group: explicit
+    meaning: 'The automation execution exceeded the allowed workflow nesting depth — the guard against runaway or recursive automations.'
+    remediation: 'Break the workflow into shallower stages or remove the automation that re-triggers itself.'
+  - code: WEBHOOK_TIMEOUT
+    group: webhook-phase
+    phase: timeout
+    meaning: 'The outgoing webhook target did not respond within the timeout.'
+    remediation: 'Confirm the target endpoint is reachable and responds inside the timeout; erxes retries with exponential backoff.'
+  - code: WEBHOOK_NETWORK_FAILED
+    group: webhook-phase
+    phase: network
+    meaning: 'The outgoing webhook request failed at the network layer (DNS, TLS, connection refused).'
+    remediation: 'Check DNS/TLS and any egress firewall between the erxes automations service and the target.'
+  - code: WEBHOOK_BAD_RESPONSE
+    group: webhook-phase
+    phase: response-parse
+    meaning: 'The outgoing webhook target responded, but the body could not be parsed as expected.'
+    remediation: 'Return well-formed JSON with a JSON content-type, or stop mapping the response into later steps.'
+  - code: WEBHOOK_FAILED
+    group: webhook-phase
+    phase: '(fallback for any unmapped phase)'
+    meaning: 'An outgoing webhook failed for a reason with no more specific phase code.'
+    remediation: 'Inspect the recorded request/response pair on the execution.'
+  - code: PROVIDER_ERROR
+    group: classifier
+    classifier_category: PROVIDER
+    meaning: 'A third-party provider erxes called returned an error.'
+    remediation: 'Retry per the provider; erxes retries 408, 425, 429, 500, 502, 503 and 504 with backoff.'
+  - code: INTERNAL_ERROR
+    group: classifier
+    classifier_category: SYSTEM
+    meaning: 'An unexpected internal/system failure inside erxes.'
+    remediation: 'Report with the execution id; this is an erxes-side defect or infrastructure fault.'
+  - code: BUSINESS_ERROR
+    group: classifier
+    classifier_category: EXPECTED
+    meaning: 'An expected, business-rule failure — the action ran and was legitimately rejected.'
+    remediation: 'Surface to the user; do not retry blindly.'
+  - code: UNKNOWN
+    group: fallback
+    meaning: 'No explicit code, no webhook phase, and no classifier category matched.'
+    remediation: 'Treat as unclassified; capture the raw error for triage.'
+code_count: 14
+webhook_retryable_status_codes: [408, 425, 429, 500, 502, 503, 504]
+gaps:
+  - >-
+    There is no published, user-facing error reference on erxes.io or
+    docs.erxes.io. This registry is only discoverable by reading the
+    open-source backend.
+  - >-
+    The registry covers the automations service. Core GraphQL resolver errors
+    carry a message and an Apollo extensions.code but no erxes-specific,
+    documented code vocabulary.
+  - 'erxes does not use RFC 9457 application/problem+json anywhere.'

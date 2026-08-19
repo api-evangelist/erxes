@@ -1,0 +1,85 @@
+generated: '2026-08-13'
+method: searched
+source: https://github.com/erxes/erxes-cli
+docs: https://github.com/erxes/erxes-cli#readme
+name: erxes
+binary: erxes
+description: >-
+  First-party command-line client for erxes. Authenticates against an erxes
+  gateway with the OAuth 2.0 device flow and drives the contacts surface. Early
+  and deliberately narrow — the published command tree covers auth plus
+  contacts only.
+version: 3.0.0-beta.1
+license: MIT
+repository: https://github.com/erxes/erxes-cli
+last_commit: '2026-08-02'
+runtime: Node.js >= 20
+install:
+  - method: npm (from GitHub)
+    command: npm install --global --install-links erxes/erxes-cli
+    note: >-
+      `--install-links` makes npm copy the GitHub package instead of linking
+      its temporary clone. This is the ONLY documented install path — the CLI
+      is not published to npm, so re-running the same command is also how you
+      upgrade, and there is no way to pin a version.
+verify:
+  - erxes version
+  - erxes --help
+global_flags:
+  - {flag: '--profile <name>', description: 'select a named profile so one machine can address multiple erxes installations'}
+  - {flag: '--json', description: 'machine-readable output on any data command'}
+  - {flag: '--help, -h', description: 'usage'}
+  - {flag: '--version, -v', description: 'CLI version'}
+commands:
+  - group: auth
+    commands:
+      - name: login
+        usage: 'erxes login --host <gateway-url> --client-id <public-oauth-client-id>'
+        flags:
+          - {flag: '--host', description: 'erxes gateway URL'}
+          - {flag: '--client-id', description: 'public OAuth client id created in erxes Settings > OAuth Clients'}
+          - {flag: '--no-browser', description: 'print only the verification URL and code instead of opening a browser'}
+        description: OAuth 2.0 device-flow login against an erxes gateway.
+      - name: logout
+        usage: erxes logout
+        description: Delete the stored credentials for the active profile.
+      - name: whoami
+        usage: erxes whoami
+        description: Show the authenticated identity for the active profile.
+      - name: version
+        usage: erxes version
+        description: Print the CLI version.
+  - group: contacts
+    commands:
+      - name: contacts list
+        usage: 'erxes contacts list [--limit <n>] [--search <value>]'
+        public_operation: core.contacts.customers.list.v1
+        description: List customers.
+      - name: contacts get
+        usage: 'erxes contacts get <customer-id>'
+        public_operation: core.contacts.customers.detail.v1
+        description: Fetch one customer by id.
+      - name: contacts create
+        usage: 'erxes contacts create --first-name <n> --last-name <n> --email <e>'
+        public_operation: core.contacts.customers.create.v1
+        description: Create a customer.
+environment:
+  - {name: ERXES_HOST, description: default gateway URL for login}
+  - {name: ERXES_CLIENT_ID, description: default public OAuth client id}
+  - {name: ERXES_TOKEN, description: 'OAuth access token for non-interactive use; pair with ERXES_HOST'}
+  - {name: ERXES_CONFIG_DIR, description: override the configuration directory}
+credential_storage:
+  note: >-
+    Profile configuration and OAuth credentials are stored separately. On
+    unix-like systems the config directory is mode 0700 and credential files
+    are mode 0600.
+prerequisites:
+  note: >-
+    The OAuth client must be created as a PUBLIC client and must have each
+    public operation the CLI calls explicitly enabled — the README names the
+    three contacts operations above.
+gaps:
+  - 'Not published to any registry; install and upgrade both track a moving git branch.'
+  - 'Contacts is the only data surface. No companies, tickets, deals, tasks, automations or team-member commands.'
+  - 'No shell-completion, no config command, no output format beyond --json.'
+package_reference: packages/erxes-packages.yml

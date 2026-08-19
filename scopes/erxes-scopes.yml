@@ -1,0 +1,95 @@
+generated: '2026-08-13'
+method: searched
+source: >-
+  https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/erxes-graphql-api.md
+docs:
+  - https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/erxes-graphql-api.md
+  - https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/operation-api.md
+  - https://github.com/erxes/erxes-cli#authenticate
+note: >-
+  0-working/derive-oauth-scopes.py could not run a baseline — erxes publishes no
+  OpenAPI, so there is no securitySchemes block to aggregate. These scopes are
+  SEARCHED from the provider's own published agent-plugin reference, where each
+  core GraphQL operation is filed under the exact scope string that authorizes
+  it, and from the erxes CLI README, which names the versioned "public
+  operation" identifiers an OAuth client must enable. OAuth clients are created
+  per tenant in erxes Settings > OAuth Clients. Nothing here is inferred: every
+  scope string below appears verbatim in a provider-published document.
+schemes:
+  - name: OAuth2 Device Authorization Grant
+    flows:
+      - flow: deviceCode
+        grant_type: 'urn:ietf:params:oauth:grant-type:device_code'
+        registration: erxes Settings > OAuth Clients
+    source: authentication/erxes-authentication.yml
+scopes:
+  - {scope: 'contacts:read', description: 'List and view customers (customers, customerDetail).', resource: contacts}
+  - {scope: 'contacts:create', description: 'Create a customer (customersAdd).', resource: contacts}
+  - {scope: 'contacts:update', description: 'Edit customer information (customersEdit).', resource: contacts}
+  - {scope: 'contacts:remove', description: 'Delete customers (customersRemove).', resource: contacts}
+  - {scope: 'contacts:merge', description: 'Merge duplicate customer records (customersMerge).', resource: contacts}
+  - {scope: 'products:read', description: 'List products (products).', resource: products}
+  - {scope: 'products:create', description: 'Create products and product categories (productsAdd, productCategoriesAdd).', resource: products}
+  - {scope: 'products:update', description: 'Edit products (productsEdit).', resource: products}
+  - {scope: 'products:remove', description: 'Delete products (productsRemove).', resource: products}
+  - {scope: 'products:merge', description: 'Merge duplicate products (productsMerge).', resource: products}
+  - {scope: 'products:manage', description: 'Manage product supporting records such as units of measure (uomsAdd).', resource: products}
+  - {scope: 'tags:read', description: 'List tags (tags).', resource: tags}
+  - {scope: 'tags:create', description: 'Create a tag (tagsAdd).', resource: tags}
+  - {scope: 'tags:update', description: 'Edit a tag (tagsEdit).', resource: tags}
+  - {scope: 'tags:remove', description: 'Delete a tag (tagsRemove).', resource: tags}
+  - {scope: 'tags:tag', description: 'Attach or detach a tag on another object (tagsTag).', resource: tags}
+  - {scope: 'documents:read', description: 'List documents (documents).', resource: documents}
+  - {scope: 'documents:create', description: 'Create documents (documentsSave). erxes documents this paired with documents:update.', resource: documents}
+  - {scope: 'documents:update', description: 'Edit documents (documentsSave). erxes documents this paired with documents:create.', resource: documents}
+  - {scope: 'documents:remove', description: 'Delete documents (documentsRemove).', resource: documents}
+  - {scope: 'brands:read', description: 'List brands (brands).', resource: brands}
+  - {scope: 'brands:create', description: 'Create a brand (brandsAdd).', resource: brands}
+  - {scope: 'brands:update', description: 'Edit a brand (brandsEdit).', resource: brands}
+  - {scope: 'brands:remove', description: 'Delete a brand (brandsRemove).', resource: brands}
+  - {scope: 'organization:read', description: 'Read the organization structure — departments, branches, units (structures).', resource: organization}
+  - {scope: 'organization:manage', description: 'Create organization structure records (departmentsAdd, branchesAdd).', resource: organization}
+  - {scope: 'teamMembers:read', description: 'List team members (users).', resource: teamMembers}
+  - {scope: 'teamMembers:create', description: 'Invite a new team member (usersInvite).', resource: teamMembers}
+  - {scope: 'teamMembers:update', description: 'Edit a team member (usersEdit).', resource: teamMembers}
+  - {scope: 'teamMembers:remove', description: 'Deactivate a team member (usersSetActiveStatus).', resource: teamMembers}
+  - {scope: 'automations:read', description: 'List automations (automations).', resource: automations}
+  - {scope: 'automations:create', description: 'Create an automation (automationsAdd).', resource: automations}
+  - {scope: 'automations:update', description: 'Edit an automation (automationsEdit).', resource: automations}
+  - {scope: 'automations:delete', description: 'Delete an automation (automationsRemove).', resource: automations}
+scope_count: 34
+public_operations:
+  note: >-
+    Separate from the scope strings above, the erxes CLI documents versioned
+    "public operation" identifiers that must be enabled individually on an
+    OAuth client before that client may call them. Only the three the CLI needs
+    are published; the naming shape is <plugin>.<module>.<resource>.<verb>.<version>.
+  source: https://github.com/erxes/erxes-cli#authenticate
+  operations:
+    - core.contacts.customers.list.v1
+    - core.contacts.customers.detail.v1
+    - core.contacts.customers.create.v1
+backend_permissions:
+  note: >-
+    The operation plugin additionally publishes backend permission NAMES (not
+    OAuth scopes). erxes states these are backend reference only and that an
+    agent should proceed as owner and surface an access issue only when the API
+    actually rejects a call. Recorded for completeness, not as a scope surface.
+  source: https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/operation-api.md
+  permissions:
+    tasks: [taskRead, taskCreate, taskUpdate, taskRemove, taskAssign]
+    triage: [triageRead, triageCreate, triageUpdate, triageConvert]
+    projects: [projectRead, projectCreate, projectUpdate, projectRemove]
+    milestones: [milestoneRead, milestoneCreate, milestoneUpdate, milestoneRemove]
+    cycles: [cycleRead, cycleCreate, cycleUpdate, cycleRemove, cycleEnd]
+    teams: [teamRead, teamCreate, teamUpdate, teamRemove, teamMemberManage]
+    notes: [noteRead, noteCreate, noteUpdate, noteRemove]
+    statuses: [statusRead, statusCreate, statusUpdate, statusRemove]
+gaps:
+  - >-
+    erxes publishes no consolidated scopes reference page on erxes.io or
+    docs.erxes.io. The only place the scope vocabulary is written down is the
+    agent-plugin reference in the erxes-skills repository.
+  - >-
+    The block plugin ships no permission matrix at all; erxes says so itself
+    under "Needs Verification" in block-api.md.

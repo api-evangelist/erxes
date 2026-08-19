@@ -1,0 +1,90 @@
+generated: '2026-08-13'
+method: probed
+source: live HTTP probes, 2026-08-13
+note: >-
+  NO POINTER EMITTED. Every /.well-known/ path was probed on every erxes host
+  and not one returned a real document. erxes.io is a Next.js single-page app
+  whose catch-all answers HTTP 200 with the marketing HTML shell for
+  /openapi.json, /swagger.json, /llms.txt and /api-docs, and HTTP 500 (the
+  Next.js error boundary) for every /.well-known/* path — neither is a
+  document. demo.next.erxes.io (a live erxes tenant) answers 200 with the
+  Angular app shell for all of them: the classic SPA catch-all false positive.
+  Because no path returned a real document, no WellKnown and no SecurityTxt
+  pointer is wired into apis.yml. erxes DOES publish a vulnerability-disclosure
+  policy, but as SECURITY.md in its GitHub repository, not as an RFC 9116
+  security.txt — see security/erxes-vulnerability-disclosure.yml.
+hosts:
+  - host: https://erxes.io
+    kind: marketing site / apis.yml baseURL
+    behavior: >-
+      SPA catch-all. 200 + HTML for unknown top-level paths, 500 + Next.js
+      error HTML for /.well-known/*.
+    documents:
+      - {path: /.well-known/security.txt, status: 500, document: false}
+      - {path: /.well-known/openid-configuration, status: 500, document: false}
+      - {path: /.well-known/oauth-authorization-server, status: 500, document: false}
+      - {path: /.well-known/api-catalog, status: 500, document: false}
+      - {path: /.well-known/ai-plugin.json, status: 500, document: false}
+      - {path: /.well-known/agent-card.json, status: 500, document: false}
+      - {path: /.well-known/agent.json, status: 500, document: false}
+      - {path: /openapi.json, status: 200, document: false, note: 'HTML shell, not a spec'}
+      - {path: /openapi.yaml, status: 200, document: false, note: 'HTML shell, not a spec'}
+      - {path: /swagger.json, status: 200, document: false, note: 'HTML shell, not a spec'}
+      - {path: /api-docs, status: 200, document: false, note: 'HTML shell'}
+      - {path: /llms.txt, status: 200, document: false, note: 'HTML shell, not llms.txt'}
+      - {path: /sitemap.xml, status: 200, document: true, note: 'real XML sitemap, 43 URLs — not a /.well-known/ document but a genuine machine-readable index'}
+  - host: https://www.erxes.io
+    kind: canonical www host
+    behavior: 'plain 404 ("404 page not found") on every probed path — honest, no catch-all'
+    documents:
+      - {path: /.well-known/security.txt, status: 404, document: false}
+      - {path: /.well-known/openid-configuration, status: 404, document: false}
+      - {path: /.well-known/oauth-authorization-server, status: 404, document: false}
+      - {path: /.well-known/api-catalog, status: 404, document: false}
+      - {path: /.well-known/ai-plugin.json, status: 404, document: false}
+      - {path: /.well-known/agent-card.json, status: 404, document: false}
+      - {path: /.well-known/agent.json, status: 404, document: false}
+      - {path: /openapi.json, status: 404, document: false}
+      - {path: /llms.txt, status: 404, document: false}
+  - host: https://docs.erxes.io
+    kind: developer documentation
+    behavior: 'Next.js 404 error page on every probed path'
+    documents:
+      - {path: /.well-known/security.txt, status: 404, document: false}
+      - {path: /.well-known/openid-configuration, status: 404, document: false}
+      - {path: /.well-known/oauth-authorization-server, status: 404, document: false}
+      - {path: /.well-known/agent-card.json, status: 404, document: false}
+      - {path: /.well-known/agent.json, status: 404, document: false}
+      - {path: /openapi.json, status: 404, document: false}
+      - {path: /llms.txt, status: 404, document: false}
+      - {path: /sitemap.xml, status: 404, document: false}
+  - host: https://demo.next.erxes.io
+    kind: live erxes 3.x tenant (gateway host pattern from the provider's own agent plugin)
+    behavior: >-
+      Angular SPA catch-all — HTTP 200 with the app shell for every
+      /.well-known/* path. Treated as a MISS on all of them. The one real
+      machine surface on this host is /gateway/graphql, which answers a
+      structured GraphQL error (HTTP 400 "Invalid GraphQL request") and
+      confirms the gateway path documented by erxes.
+    documents:
+      - {path: /.well-known/security.txt, status: 200, document: false, note: 'SPA shell'}
+      - {path: /.well-known/openid-configuration, status: 200, document: false, note: 'SPA shell'}
+      - {path: /.well-known/oauth-authorization-server, status: 200, document: false, note: 'SPA shell'}
+      - {path: /.well-known/agent-card.json, status: 200, document: false, note: 'SPA shell'}
+      - {path: /llms.txt, status: 200, document: false, note: 'SPA shell'}
+      - {path: /gateway/graphql, status: 400, document: false, note: 'live GraphQL endpoint; introspection returns INTROSPECTION_DISABLED'}
+  - host: https://api.erxes.io
+    kind: probed on spec
+    behavior: does not resolve (no DNS / no connection)
+    documents:
+      - {path: /openapi.json, status: null, document: false, note: 'host does not resolve'}
+  - host: https://app.erxes.io
+    kind: probed on spec
+    behavior: does not resolve (no DNS / no connection)
+    documents:
+      - {path: /openapi.json, status: null, document: false, note: 'host does not resolve'}
+summary:
+  paths_probed: 55
+  real_documents_found: 0
+  wellknown_pointer_emitted: false
+  securitytxt_pointer_emitted: false

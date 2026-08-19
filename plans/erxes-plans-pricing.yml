@@ -1,0 +1,123 @@
+generated: '2026-08-13'
+method: searched
+source: https://erxes.io/pricing/self-service/frontline
+docs:
+  - https://erxes.io/pricing/self-service/frontline
+  - https://erxes.io/pricing/community-edition
+  - https://erxes.io/pricing/enterprise
+note: >-
+  erxes publishes plan TIERS with quotas but NOT PRICES. Every tier on the
+  self-service pricing pages renders its feature/quota matrix with no monetary
+  amount attached, and every edition page (Enterprise, Embed, Platform,
+  Infrastructure) routes to "Talk to sales". Only the Free tier and the
+  self-hosted Community Edition carry a stated price, and that price is zero.
+  Pricing is segmented per product module — Frontline, Sales, Marketing,
+  Operation, Commerce and Content each have their own /pricing/self-service/
+  page — so the tier names below are the Frontline module's. Quotas verified
+  against the live page on 2026-08-13; note the third tier is labelled
+  "Messenger" on the page today (it was captured as "Enterprise" in the June
+  2026 pass in plans/erxes-plans.md), with the same quota column.
+currency: USD
+billing_period: monthly
+plan_count: 5
+plans:
+  - name: Free
+    price: 0
+    currency: USD
+    period: month
+    price_published: true
+    quotas:
+      team_members: 1
+      contacts: 5000
+      popups_and_forms: 5
+      knowledge_bases: 1
+      portals: 1
+      automations: 3
+      segments: 5
+      ticket_management: 5
+      email_sending_per_month: 5000
+  - name: Business
+    price: null
+    currency: USD
+    period: month
+    price_published: false
+    price_note: 'no amount displayed on the pricing page; contact sales'
+    quotas:
+      team_members: 5
+      contacts: 25000
+      popups_and_forms: 10
+      knowledge_bases: 2
+      portals: 2
+      automations: 6
+      segments: 10
+      ticket_management: 15
+      email_sending_per_month: 5000
+  - name: Messenger
+    price: null
+    currency: USD
+    period: month
+    price_published: false
+    price_note: >-
+      no amount displayed; top self-service tier on the Frontline page. Listed
+      as "Enterprise" in the June 2026 capture — the label changed, the quota
+      column did not.
+    quotas:
+      team_members: 10
+      contacts: 200000
+      popups_and_forms: 15
+      knowledge_bases: 4
+      portals: 4
+      automations: 10
+      segments: 20
+      ticket_management: 25
+      email_sending_per_month: 30000
+  - name: Community Edition (self-hosted)
+    price: 0
+    currency: USD
+    period: perpetual
+    price_published: true
+    license: AGPL-3.0
+    quotas:
+      team_members: unlimited
+      contacts: unlimited
+    note: >-
+      Source-available under AGPL, self-hosted. No seat or contact limits are
+      imposed by the software; the real cost is infrastructure and operations —
+      see finops/erxes-finops.md.
+  - name: Enterprise Edition
+    price: null
+    currency: USD
+    period: null
+    price_published: false
+    license: proprietary
+    price_note: 'quote only — "Talk to sales". Same for the Embed, Platform and Infrastructure editions.'
+    includes:
+      - custom onboarding
+      - dedicated implementation services
+      - migration services
+      - premium support
+add_ons:
+  - {name: Premium Support, price: null}
+  - {name: Custom Onboarding, price: null}
+  - {name: Dedicated Implementation Services, price: null}
+  - {name: Migration Services, price: null}
+modules_with_separate_pricing:
+  - {module: Frontline, url: https://erxes.io/pricing/self-service/frontline}
+  - {module: Sales, url: https://erxes.io/pricing/self-service/sales}
+  - {module: Marketing, url: https://erxes.io/pricing/self-service/marketing}
+  - {module: Operation, url: https://erxes.io/pricing/self-service/operation}
+  - {module: Commerce, url: https://erxes.io/pricing/self-service/commerce}
+  - {module: Content, url: https://erxes.io/pricing/self-service/content}
+editions_quote_only:
+  - {edition: Enterprise, url: https://erxes.io/pricing/enterprise}
+  - {edition: Embed, url: https://erxes.io/software/embed}
+  - {edition: Platform, url: https://erxes.io/software/platform}
+  - {edition: Infrastructure, url: https://erxes.io/software/infrastructure}
+api_pricing:
+  metered: false
+  note: 'No per-API-call charge in either the SaaS or self-hosted model. API access is not a separately priced line item.'
+gaps:
+  - >-
+    No monetary amount is published for any paid tier. A buyer cannot compare
+    erxes on price without contacting sales, and neither can an agent.
+  - 'No annual-vs-monthly pricing is shown, and no per-seat rate is stated.'

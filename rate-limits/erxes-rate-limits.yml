@@ -1,0 +1,69 @@
+generated: '2026-08-13'
+method: searched
+source: https://github.com/erxes/erxes/blob/main/backend/services/automations/src/executions/actions/webhook/incoming/rateLimits.ts
+note: >-
+  erxes publishes NO rate limits for its GraphQL gateway — not in the docs, not
+  in the pricing pages, not in the source. The limits below are the only real,
+  enforced limits erxes ships, and they apply to the automation webhook
+  endpoints in a self-hosted deployment. They are read verbatim from the
+  open-source implementation (express-rate-limit), including the exact response
+  headers, because an agent needs the runtime signal rather than a number in
+  prose. Everything else on the platform is quota, not rate — see
+  plans/erxes-plans-pricing.yml. This file supersedes the prose in
+  rate-limits/erxes-rate-limits.md, which recorded only quotas and
+  recommendations.
+limits:
+  - id: automation-incoming-webhook
+    scope: 'per client IP + webhook id'
+    surface: 'POST/ANY <host>/automation/:id/*'
+    window: 60s
+    limit: 100
+    burst: null
+    status_on_exhaustion: 429
+    response_body: '{"success": false, "message": "Too many webhook requests, please try again later."}'
+    headers:
+      standard: true
+      emitted: [RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, RateLimit-Policy]
+      legacy_x_headers: false
+      retry_after: 'not set explicitly by erxes; express-rate-limit emits Retry-After on 429 by default'
+    counts_successful_requests: true
+    source: backend/services/automations/src/executions/actions/webhook/incoming/rateLimits.ts
+  - id: automation-execution-continue
+    scope: 'per client IP + execution id'
+    surface: 'ANY <host>/automation/:executionId/:actionId/continue/*'
+    window: 60s
+    limit: 20
+    burst: null
+    status_on_exhaustion: 429
+    response_body: '{"success": false, "message": "Too many requests, try later"}'
+    headers:
+      standard: true
+      emitted: [RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, RateLimit-Policy]
+      legacy_x_headers: false
+    source: backend/services/automations/src/executions/actions/webhook/incoming/rateLimits.ts
+limit_count: 2
+payload_limits:
+  - {surface: automation webhook body, limit: 1mb}
+  - {surface: custom field upload, limit: 630 MiB, since: '3.0.77 (2026-08-12)'}
+graphql_gateway:
+  limits_published: false
+  note: >-
+    No per-second, per-minute or per-day limit is documented or enforced in
+    code for <gateway>/graphql. In a self-hosted deployment throttling is the
+    operator's job at the reverse proxy (nginx/Traefik/Cloudflare) in front of
+    the gateway. For the erxes SaaS tiers, no throttling policy is published;
+    the tier constraints are contact and email QUOTAS, not request rates.
+quotas:
+  note: 'Plan-tier quotas, not rate limits. Full tier detail in plans/erxes-plans-pricing.yml.'
+  source: https://erxes.io/pricing/self-service/frontline
+  entries:
+    - {plan: Free, contacts: 5000, emails_per_month: 5000, team_members: 1}
+    - {plan: Business, contacts: 25000, emails_per_month: 5000, team_members: 5}
+    - {plan: Enterprise, contacts: 200000, emails_per_month: 30000, team_members: 10}
+    - {plan: Self-Hosted, contacts: unlimited, emails_per_month: 'bounded by your SMTP/ESP', team_members: unlimited}
+retry_guidance:
+  outbound_from_erxes:
+    retryable_status_codes: [408, 425, 429, 500, 502, 503, 504]
+    strategy: exponential backoff
+    source: backend/services/automations/src/executions/actions/webhook/outgoing/outgoingWebhook.ts
+  inbound_to_erxes: 'No published guidance. Integrators should back off on 429 and honor RateLimit-Reset on the webhook endpoints.'

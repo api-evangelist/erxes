@@ -1,0 +1,82 @@
+generated: '2026-08-13'
+method: searched
+source: https://github.com/erxes/erxes/blob/main/CHANGELOG.md
+urls:
+  changelog: https://github.com/erxes/erxes/blob/main/CHANGELOG.md
+  releases: https://github.com/erxes/erxes/releases
+  site: https://erxes.io/changelog
+scheme:
+  versioning: semver
+  automation: semantic-release (conventional commits -> Bug Fixes / Features sections, compare links per release)
+  current_version: 3.0.79
+  current_date: '2026-08-13'
+  cadence: near-daily; 8 releases between 2026-08-06 and 2026-08-13
+  breaking_change_section: none observed in the recent window
+note: >-
+  The dated changelog lives in the open-source repository and is generated, not
+  hand-written; erxes.io/changelog is a client-rendered page over the same
+  material. Entries below are the recent window only, quoted from the
+  repository CHANGELOG. Nothing here targets the API contract specifically —
+  erxes ships product changes, and schema changes ride along with them
+  unannounced (see lifecycle/erxes-lifecycle.yml).
+entries:
+  - version: 3.0.79
+    date: '2026-08-13'
+    breaking: []
+    features:
+      - 'frontline: add call history report'
+      - 'pipelines: select properties by group'
+    fixes:
+      - 'add branch and department fields to ticket form and detail (#8931)'
+      - 'frontline: make the inbox layout adapt to narrow viewports (#8991)'
+      - 'gateway: add missing comma in frontline locale files'
+      - 'group ticket bulk actions in an Actions popover (#8947)'
+      - 'preserve legacy pipeline properties (#9005)'
+      - 'sales: deals search and stage code/product config payment cyrillic (#8999)'
+      - 'sales: stabilize deal payment saves (#9010)'
+  - version: 3.0.78
+    date: '2026-08-12'
+    breaking: []
+    features:
+      - 'frontline: add client portal messenger conversation operations'
+      - 'pipelines: add scoped property selection (#9001)'
+    fixes:
+      - 'calc excludeAmount and totalAmount with additionalconfig.discountCheck (#9000)'
+      - 'calc score with scoreCampaigns product filter (#9003)'
+  - version: 3.0.77
+    date: '2026-08-12'
+    breaking: []
+    features:
+      - 'accounting adjust closing transaction (#7389)'
+      - 'add automation stats components and hooks'
+      - 'enhance message action limits under comment triggers with optional connects'
+      - 'expired payment status; fix multiple transactions for 1 invoice'
+    fixes:
+      - 'content: allow 630 MiB custom field uploads (#8990)'
+      - 'posclient report with permission (#8997)'
+      - 'saas-migrations: tags'
+  - version: 3.0.76
+    date: '2026-08-11'
+    breaking: []
+    features:
+      - 'accounting adjust rate fund and debt (#6811)'
+      - 'frontline: multi-select real pipeline status filter for ticket reports'
+      - 'global search across contacts, conversations and deals (#8917)'
+    fixes:
+      - 'frontline: prevent duplicate answer on incoming call'
+      - 'loyalty: discounted row exclude score logic'
+  - version: 3.0.75
+    date: '2026-08-10'
+    breaking: []
+    features: []
+    fixes: []
+    note: 'entry present in CHANGELOG; contents not captured in this window'
+recent_releases:
+  - {version: 3.0.79, date: '2026-08-13'}
+  - {version: 3.0.78, date: '2026-08-12'}
+  - {version: 3.0.77, date: '2026-08-12'}
+  - {version: 3.0.76, date: '2026-08-11'}
+  - {version: 3.0.75, date: '2026-08-10'}
+  - {version: 3.0.74, date: '2026-08-08'}
+  - {version: 3.0.73, date: '2026-08-07'}
+  - {version: 3.0.72, date: '2026-08-06'}

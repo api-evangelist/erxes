@@ -1,0 +1,67 @@
+generated: '2026-08-13'
+method: searched
+source: https://github.com/erxes/erxes/blob/main/CHANGELOG.md
+versioning:
+  scheme: semver (platform release), automated by semantic-release
+  current: 3.0.79
+  released: '2026-08-13'
+  cadence: 'one release per merge day — 3.0.72 through 3.0.79 all shipped between 2026-08-06 and 2026-08-13'
+  docs: https://github.com/erxes/erxes/releases
+  api_versioning: >-
+    None on the API surface. No version path segment, no version header, no
+    date pinning. The GraphQL schema moves with the platform release. The only
+    versioned API identifiers erxes publishes are the CLI public-operation
+    names (core.contacts.customers.list.v1).
+deprecation:
+  policy_url: null
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  note: >-
+    erxes publishes NO deprecation policy. There is no sunset window, no
+    Deprecation/Sunset header support, and no documented notice period for
+    removing a GraphQL field or an operation. What exists instead is
+    deprecation-by-archive at the repository level — erxes-widgets and
+    erxes-widgets-api are marked "Deprecated: Repo is now integrated with
+    erxes/erxes" in their GitHub descriptions, and erxes-api (last pushed
+    2020-11-05) is superseded by the monorepo. Because there is no policy,
+    NO `Deprecation` pointer is emitted.
+  superseded_repositories:
+    - {repo: erxes/erxes-api, status: superseded, last_push: '2020-11-05', successor: erxes/erxes monorepo}
+    - {repo: erxes/erxes-widgets, status: 'marked Deprecated by the provider', successor: erxes/erxes}
+    - {repo: erxes/erxes-widgets-api, status: 'marked Deprecated by the provider', successor: erxes/erxes}
+    - {repo: erxes/erxes-integrations, status: superseded, last_push: '2020-10-28', successor: 'in-monorepo integrations under backend/plugins/frontline_api'}
+sla:
+  url: null
+  uptime_target: null
+  note: >-
+    No published SLA. erxes is primarily self-hosted (AGPLv3), so availability
+    is the operator's; the SaaS tiers list support add-ons but no uptime
+    commitment. Enterprise pricing is quote-only.
+status_page: https://status.erxes.io
+status_page_detail:
+  title: 'erxes Inc status'
+  platform: Atlassian Statuspage
+  probed: '2026-08-13'
+  http_status: 200
+  note: 'Real, populated status page — component states, uptime history and incident history are all present.'
+support_lifecycle:
+  editions:
+    - {name: Community Edition, license: AGPL-3.0, support: community (Discord, GitHub Discussions)}
+    - {name: Enterprise Edition, license: proprietary, support: 'premium support / dedicated implementation (paid add-on)'}
+  security_disclosure_window: '90 days'
+  security_policy: https://github.com/erxes/erxes/blob/main/SECURITY.md
+change_communication:
+  changelog_repo: https://github.com/erxes/erxes/blob/main/CHANGELOG.md
+  changelog_site: https://erxes.io/changelog
+  releases: https://github.com/erxes/erxes/releases
+  roadmap: https://erxes.io/roadmap
+  roadmap_note: >-
+    The /roadmap page renders a "Roadmap / 2026" heading with no populated
+    items as of 2026-08-13 — the route exists and is in the sitemap, but the
+    content is empty.
+  detail: changelog/erxes-changelog.yml
+deprecated_operations: []
+deprecated_operations_note: >-
+  Cannot be derived — there is no OpenAPI, and the harvested GraphQL SDL in
+  graphql/erxes-schema.graphql carries no @deprecated directives.

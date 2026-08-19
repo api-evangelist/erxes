@@ -1,0 +1,122 @@
+generated: '2026-08-13'
+method: searched
+source: https://github.com/erxes/erxes-skills/tree/main/agent-plugin/erxes-next
+note: >-
+  erxes publishes its own agent operating instructions in the erxes/erxes-skills
+  repository as a Clawhub/OpenClaw agent plugin ("erxes-next-plugin", version
+  1.0.23). Every file below is saved VERBATIM from that repository — API
+  Evangelist authored none of it. The plugin drives the erxes GraphQL gateway
+  over confidential OAuth device flow and carries explicit anti-hallucination
+  rules. A second, separate repository (erxes/erxes-dev-skills) publishes ~30
+  SKILL.md files for CONTRIBUTING to the erxes codebase (create-plugin,
+  create-backend-entity, create-query, …); those are development skills, not
+  API-consumption skills, and are referenced rather than copied here.
+publisher:
+  plugin_slug: erxes-next-plugin
+  plugin_version: 1.0.23
+  format: openclaw/clawhub agent-plugin (schemaVersion 1)
+  entry: instructions.md
+  repository: https://github.com/erxes/erxes-skills
+  last_commit: '2026-08-11'
+skills:
+  - file: erxes-agent-plugin-instructions.md
+    name: Operate erxes over GraphQL (plugin entry point)
+    description: >-
+      Root operating instructions for an agent driving erxes: required first
+      step (check the persisted OAuth session), login flow, how to make GraphQL
+      calls through the session manager, safe-action rules, and hard
+      anti-hallucination rules (never invent IDs, operations, or REST
+      endpoints; never claim a mutation succeeded without a live response).
+    api: graphql/erxes-schema.graphql
+    source: https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/instructions.md
+    method: searched
+  - file: erxes-oauth-login.md
+    name: Authenticate with erxes (confidential OAuth device flow)
+    description: >-
+      Quick login reference — check the saved session first, run the device
+      flow only when unauthenticated, expiry facts (device code 10 minutes,
+      access token 28800s), rotating refresh tokens, and session persistence
+      controls (3m/6m/1y).
+    api: graphql/erxes-schema.graphql
+    operations: [login, refresh, logout, status]
+    source: https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/erxes-app-token-auth.md
+    method: searched
+  - file: erxes-core-graphql-operations.md
+    name: Core erxes GraphQL operations by OAuth scope
+    description: >-
+      Full operation reference grouped by scope — contacts, products, tags,
+      documents, brands, organization structure, team members and automations —
+      each with the exact GraphQL query/mutation and a JSON request body.
+    api: graphql/erxes-schema.graphql
+    operations:
+      - customers
+      - customerDetail
+      - customersAdd
+      - customersEdit
+      - customersRemove
+      - customersMerge
+      - products
+      - productsAdd
+      - productsEdit
+      - productsRemove
+      - productsMerge
+      - productCategoriesAdd
+      - uomsAdd
+      - tags
+      - tagsAdd
+      - tagsEdit
+      - tagsRemove
+      - tagsTag
+      - documents
+      - documentsSave
+      - documentsRemove
+      - brands
+      - brandsAdd
+      - brandsEdit
+      - brandsRemove
+      - structures
+      - departmentsAdd
+      - branchesAdd
+      - users
+      - usersInvite
+      - usersEdit
+      - usersSetActiveStatus
+      - automations
+      - automationsAdd
+      - automationsEdit
+      - automationsRemove
+    source: https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/erxes-graphql-api.md
+    method: searched
+  - file: erxes-operation-plugin-workflows.md
+    name: Operate the erxes operation plugin (projects, tasks, cycles)
+    description: >-
+      Workflow reference for the operation plugin — projects, tasks, triage,
+      teams and team members, statuses, cycles, milestones, activities, notes
+      and templates — with backend permission names and safety rules for
+      destructive mutations.
+    api: graphql/erxes-schema.graphql
+    source: https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/operation-api.md
+    method: searched
+  - file: erxes-block-plugin-workflows.md
+    name: Operate the erxes block plugin (real-estate / SaaS blocks)
+    description: >-
+      Workflow reference for the block plugin — projects, buildings/blocks,
+      floor zonings, units and unit types, opportunities and statuses, payment
+      plans, contracts, offers, invoices, documents, attachments and notes.
+    api: graphql/erxes-schema.graphql
+    source: https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/block-api.md
+    method: searched
+related:
+  - name: erxes-dev-skills
+    url: https://github.com/erxes/erxes-dev-skills
+    description: >-
+      ~30 SKILL.md + contract.yaml pairs plus .agents/rules for building erxes
+      plugins (create-plugin, create-backend-entity, create-backend-migration,
+      create-query, create-table, create-page, add-translations,
+      module-federation-expose, …). Codebase-contribution skills, not API
+      consumption skills.
+  - name: erxes AGENTS.md
+    url: https://github.com/erxes/erxes/blob/main/AGENTS.md
+    description: >-
+      Repository-wide agent/contributor guide with a nested-AGENTS.md
+      resolution protocol, plugin scope boundaries, and tenant-isolation rules.

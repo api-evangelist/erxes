@@ -1,0 +1,130 @@
+generated: '2026-08-13'
+method: searched
+source: >-
+  npm registry (registry.npmjs.org), pub.dev, Maven Central (repo1.maven.org),
+  CocoaPods trunk, and the erxes GitHub organization (github.com/erxes)
+note: >-
+  erxes is an open-source, self-hosted platform, so its client-library surface
+  is messenger/embed SDKs plus a first-party CLI rather than server-side API
+  wrappers. Registry currency was read from each registry's metadata endpoint on
+  2026-08-13; where a package is distributed from git rather than a registry the
+  version is read from the repository tag or package manifest and the registry
+  field says so.
+packages:
+  - language: javascript
+    registry: npm
+    name: erxes
+    url: https://www.npmjs.com/package/erxes
+    install: npm install -g erxes
+    official: true
+    version: 2.0.5
+    published: '2025-09-10'
+    repository: https://github.com/erxes/erxes
+    note: >-
+      Historic npm distribution of the erxes platform itself (installer). Last
+      published 2025-09-10, nearly a year before the 3.0.x line the project now
+      ships daily from GitHub — the npm channel is stale relative to the
+      product. The 3.0.0-rc.x prereleases exist on npm but "latest" still points
+      at 2.0.5.
+  - language: javascript
+    registry: github
+    name: erxes-cli
+    url: https://github.com/erxes/erxes-cli
+    install: npm install --global --install-links erxes/erxes-cli
+    official: true
+    version: 3.0.0-beta.1
+    published: '2026-08-02'
+    repository: https://github.com/erxes/erxes-cli
+    note: >-
+      First-party CLI ("erxes" binary), MIT licensed. NOT published to npm — the
+      documented install is a global install straight from the GitHub default
+      branch, so a consumer cannot pin a release. Version read from
+      package.json on master; `published` is the date of the latest commit on
+      that branch (there are no git tags). Command surface captured in
+      cli/erxes-cli.yml.
+  - language: javascript
+    registry: npm
+    name: rn-erxes-sdk
+    url: https://www.npmjs.com/package/rn-erxes-sdk
+    install: npm install rn-erxes-sdk
+    official: true
+    version: 0.5.2
+    published: '2026-06-26'
+    repository: https://github.com/erxes/rn-erxes-sdk
+    note: React Native SDK for embedding the erxes messenger.
+  - language: javascript
+    registry: npm
+    name: create-erxes-app
+    url: https://www.npmjs.com/package/create-erxes-app
+    install: npx create-erxes-app
+    official: true
+    version: 1.0.11
+    published: '2024-01-23'
+    repository: https://github.com/erxes/erxes
+    note: >-
+      Project scaffolder. Last published 2024-01-23 — predates the erxes 3.x
+      architecture entirely; treat as unmaintained.
+  - language: swift
+    registry: swift-package-manager
+    name: MessengerSDK (erxes-ios-sdk)
+    url: https://github.com/erxes/erxes-ios-sdk
+    install: 'Xcode > File > Add Package Dependencies: https://github.com/erxes/erxes-ios-sdk'
+    official: true
+    version: 0.30.14
+    published: '2026-06-26'
+    repository: https://github.com/erxes/erxes-ios-sdk
+    note: >-
+      iOS 16+ / Swift 5.9+ messenger SDK. The README advertises CocoaPods
+      support, but no pod named `erxes` is registered on the CocoaPods trunk
+      (HTTP 404), so SPM against the GitHub tag is the only distribution that
+      actually resolves. Version is the latest git tag.
+  - language: kotlin
+    registry: github
+    name: com.erxes:messenger-sdk (erxes-android-sdk)
+    url: https://github.com/erxes/erxes-android-sdk
+    install: 'implementation("com.erxes:messenger-sdk:0.30.5")'
+    official: true
+    version: 0.30.5
+    published: '2026-06-25'
+    repository: https://github.com/erxes/erxes-android-sdk
+    note: >-
+      Android (API 24+) messenger SDK, marked "in development" by its own
+      README. The documented Gradle coordinate `com.erxes:messenger-sdk` is NOT
+      resolvable from Maven Central —
+      repo1.maven.org/maven2/com/erxes/messenger-sdk/maven-metadata.xml returns
+      404 — so the install snippet only works against mavenLocal after a local
+      build. Version read from the latest git tag (v0.30.5).
+  - language: dart
+    registry: pub.dev
+    name: erxes_flutter_sdk
+    url: https://pub.dev/packages/erxes_flutter_sdk
+    install: flutter pub add erxes_flutter_sdk
+    official: false
+    version: 0.3.0
+    published: '2026-06-26'
+    repository: https://github.com/Munkhorgilb/flutter-sdk
+    note: >-
+      Flutter plugin wrapping the native erxes iOS/Android messenger SDKs. NOT
+      marked official: the published pubspec points at a personal GitHub
+      account (Munkhorgilb/flutter-sdk), not the erxes organization. The erxes
+      org does maintain github.com/erxes/flutter-erxes-sdk (last pushed
+      2026-06-26), but that repository is not the source of the pub.dev
+      package.
+  - language: javascript
+    registry: npm
+    name: erxes-ui
+    url: https://www.npmjs.com/package/erxes-ui
+    install: npm install erxes-ui
+    official: true
+    version: 0.0.90
+    published: '2022-02-11'
+    repository: https://github.com/erxes/erxes-ui
+    note: >-
+      Legacy shared component library. Last published 2022-02-11 and its
+      repository was archived-in-place in 2023; superseded by the in-monorepo
+      frontend packages. Listed for completeness, not for use.
+abandonment_signals:
+  - 'npm `erxes` latest 2.0.5 (2025-09-10) trails the shipping 3.0.79 (2026-08-13) line by a full major version.'
+  - '`create-erxes-app` 1.0.11 last published 2024-01-23; `erxes-ui` 0.0.90 last published 2022-02-11.'
+  - 'The current first-party CLI is not on npm at all — install is from a moving git branch.'
+  - '`com.erxes:messenger-sdk` is documented as a Maven Central coordinate but is not published there.'

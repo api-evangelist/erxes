@@ -1,0 +1,137 @@
+generated: '2026-08-13'
+method: searched
+source: >-
+  https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/erxes-graphql-api.md
+docs:
+  - https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/erxes-graphql-api.md
+  - https://docs.erxes.io/self-hosting
+  - graphql/erxes-schema.graphql
+note: >-
+  erxes has no REST/OpenAPI surface, so these conventions describe the GraphQL
+  Federation gateway. Everything below is read from provider-published
+  documentation or from the harvested schema in graphql/ — nothing is inferred
+  from a REST idiom that erxes does not have.
+transport:
+  protocol: GraphQL over HTTP POST
+  endpoint: '<gateway>/graphql'
+  gateway_path: /gateway
+  self_hosted_port: 'Apollo Router gateway on :4000 in dev; nginx proxies /gateway/ to 127.0.0.1:3300 in the published production layout'
+  saas_pattern: 'https://<subdomain>.next.erxes.io/gateway/graphql'
+  content_type: application/json
+  federation: >-
+    Apollo Federation. Core types (User, Customer, Company, Tag, Product,
+    Branch, Department, Position, Segment) carry @key(fields: "_id") and are
+    resolved across plugin subgraphs.
+authentication:
+  style: OAuth 2.0 device flow -> Bearer token
+  headers:
+    - 'Authorization: Bearer <accessToken>'
+    - 'erxes-subdomain: <subdomain>'
+    - 'Content-Type: application/json'
+  caveat: >-
+    `erxes-subdomain` must NOT be sent on OAuth token/refresh requests — the
+    gateway infers the tenant from the host. It is required on every GraphQL
+    call.
+  detail: authentication/erxes-authentication.yml
+multi_tenancy:
+  model: subdomain-per-tenant
+  selector_header: erxes-subdomain
+  note: >-
+    Tenant isolation is a stated non-negotiable in the erxes AGENTS.md
+    contributor rules; sessions in the first-party tooling are keyed by base
+    URL + client id so a token can never be replayed against another tenant's
+    gateway.
+idempotency:
+  supported: false
+  evidence: >-
+    No idempotency key, request key, or dedupe header appears anywhere in the
+    erxes monorepo (case-insensitive search for "idempoten" across all 11,527
+    tracked files returns zero hits) or in any published erxes document.
+    Mutations such as customersAdd, tagsAdd and automationsAdd carry no
+    client-supplied key, so a retried mutation creates a duplicate record.
+  consequence: >-
+    NO `Idempotency` pointer is emitted for erxes. Agents and integrators must
+    treat every erxes mutation as non-idempotent and de-duplicate on their own
+    side. The provider's own agent instructions compensate behaviorally rather
+    than protocol-ally: they forbid claiming a mutation succeeded unless the
+    live API response confirms it, and require confirmation before risky
+    writes.
+pagination:
+  styles:
+    - style: cursor
+      params: [limit, cursor]
+      response_fields: [list, pageInfo, totalCount]
+      applies_to: 'customers, companies, tags, users and other *ListResponse queries'
+      evidence: 'graphql/erxes-schema.graphql — type PageInfo, CustomersListResponse, CompaniesListResponse, TagsListResponse, UsersListResponse'
+    - style: offset
+      params: [page, perPage]
+      applies_to: 'oauthClientApps and the operation/block plugin list queries documented in the agent plugin'
+      evidence: 'erxes-graphql-api.md: query Customers($page: Int, $perPage: Int, $searchValue: String)'
+  note: >-
+    Both styles are live at once. The published agent examples use page/perPage
+    while the federated core schema returns cursor-based *ListResponse
+    envelopes — a consumer has to check per query which one applies.
+filtering_and_search:
+  search_param: searchValue
+  segment_params: [segment, segmentData]
+  sorting: [sortField, sortDirection]
+  date_filters: [startDate, endDate, dateFilters]
+  id_selection: [ids, excludeIds]
+  global_search: 'a cross-entity search over contacts, conversations and deals shipped in 3.0.76 (2026-08-11)'
+error_envelope:
+  shape: 'GraphQL standard — {"errors": [{"message": ..., "extensions": {"code": ...}}]}'
+  rfc9457: false
+  observed_examples:
+    - '{"errors":[{"message":"Invalid GraphQL request","extensions":{"details":"..."}}]} — HTTP 400'
+    - '{"errors":[{"message":"introspection has been disabled","extensions":{"code":"INTROSPECTION_DISABLED"}}]} — HTTP 200'
+  note: >-
+    Note the second case: a GraphQL error is returned with HTTP 200, so status
+    code alone is not a success signal. Automation-layer failures use a
+    separate typed code registry — see errors/erxes-error-codes.yml.
+  detail: errors/erxes-error-codes.yml
+introspection:
+  enabled: false
+  evidence: >-
+    POST {__schema{queryType{name}}} to https://demo.next.erxes.io/gateway/graphql
+    returns INTROSPECTION_DISABLED (HTTP 200, 2026-08-13). The schema in
+    graphql/erxes-schema.graphql was harvested from the erxes source, not from
+    a live introspection.
+rate_limit_signaling:
+  documented_surface: 'automation webhook endpoints only'
+  headers: 'RateLimit-* (express-rate-limit standardHeaders: true; legacyHeaders disabled, so no X-RateLimit-*)'
+  status_on_exhaustion: 429
+  detail: rate-limits/erxes-rate-limits.yml
+retry_semantics:
+  outbound_webhooks:
+    retryable_status_codes: [408, 425, 429, 500, 502, 503, 504]
+    strategy: exponential backoff (applyBackoff) with an attemptCount in the result meta
+    source: backend/services/automations/src/executions/actions/webhook/outgoing/outgoingWebhook.ts
+  inbound:
+    note: 'No published retry guidance for GraphQL callers; erxes ships no Retry-After on the gateway.'
+versioning:
+  scheme: semver on the platform release, not on the API surface
+  current: 3.0.79
+  mechanism: semantic-release, one release per merge day
+  api_versioning: >-
+    None. There is no /v1 path, no version header, and no date-pinning. The
+    GraphQL schema evolves with the platform release; the only versioned
+    identifiers erxes publishes are the CLI "public operation" names
+    (core.contacts.customers.list.v1).
+  detail: lifecycle/erxes-lifecycle.yml
+payload_limits:
+  webhook_body: 1mb (express.raw limit on the automation webhook router)
+  custom_field_upload: 630 MiB (raised in 3.0.77, 2026-08-12)
+security_headers:
+  note: >-
+    The automation webhook router mounts helmet with CSP default-src 'none',
+    frame-ancestors 'none', hidePoweredBy, and HSTS max-age 31536000 with
+    includeSubDomains + preload. Those apply to the webhook routes in a
+    self-hosted deployment, not to erxes.io itself — the marketing host serves
+    no HSTS (see security/erxes-domain-security.yml).
+cross_links:
+  errors: errors/erxes-error-codes.yml
+  lifecycle: lifecycle/erxes-lifecycle.yml
+  authentication: authentication/erxes-authentication.yml
+  scopes: scopes/erxes-scopes.yml
+  rate_limits: rate-limits/erxes-rate-limits.yml
+  webhooks: asyncapi/erxes-webhooks.yml
