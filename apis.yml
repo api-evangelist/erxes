@@ -26,6 +26,22 @@ tags:
   - GraphQL
   - CRM
   - Customer Experience
+  - Open-Source
+  - Marketing Automation
+  - Sales Pipeline
+  - Help Desk
+  - Ticketing
+  - Team Inbox
+  - Self-Hosted
+  - Apollo Federation
+  - Project Management
+  - Knowledge Base
+  - Webhook
+  - Agent Skills
+tags_raw:
+  - GraphQL
+  - CRM
+  - Customer Experience
   - Open Source
   - Marketing Automation
   - Sales Pipeline
@@ -43,6 +59,14 @@ apis:
     name: Erxes GraphQL API
     description: "GraphQL Federation API powering the erxes XOS platform. An Apollo Router gateway federates one subgraph per plugin — core (contacts, companies, products, tags, documents, brands, organization structure, team members, automations, permissions, notifications), sales (deals, pipelines, stages), frontline (conversations, tickets, integrations, knowledge base, forms), operation (projects, tasks, triage, teams, statuses, cycles, milestones) and block (buildings, floor zonings, units, opportunities, contracts, invoices). Core types carry Apollo Federation @key(fields: \"_id\"). Calls are POSTed to <gateway>/graphql with a Bearer access token and an erxes-subdomain tenant header. Introspection is disabled on the gateway."
     tags:
+      - GraphQL
+      - CRM
+      - Contacts
+      - Conversations
+      - Automation
+      - Apollo Federation
+      - Authentication
+    tags_raw:
       - GraphQL
       - CRM
       - Contacts
