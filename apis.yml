@@ -2,6 +2,17 @@ aid: erxes
 name: Erxes
 description: "Open-source Experience Operating System (XOS) that unifies marketing, sales, operations and support in one self-hostable platform, positioned as a replacement for HubSpot, Zendesk, Linear and Wix. The machine surface is a GraphQL Federation API served by an Apollo Router gateway — there is no REST API and no OpenAPI — covering contacts, companies, products, tags, documents, brands, organization structure, team members and automations in the core subgraph, plus sales, frontline (inbox/tickets), operation (projects/tasks/cycles) and block plugin subgraphs. Authentication is OAuth 2.0 Device Authorization Grant with per-tenant clients and a documented 34-scope vocabulary. erxes ships the Community Edition under AGPL-3.0 alongside a proprietary Enterprise Edition, publishes its own agent plugin and agent skills, and releases roughly once per merge day."
 type: Index
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: medium
+  source:
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 accessModel:
   pricing: freemium
   onboarding: self-service
