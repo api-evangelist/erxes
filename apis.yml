@@ -37,7 +37,7 @@ tags:
   - GraphQL
   - CRM
   - Customer Experience
-  - Open-Source
+  - Open Source
   - Marketing Automation
   - Sales Pipeline
   - Help Desk
@@ -65,6 +65,7 @@ tags_raw:
   - Knowledge Base
   - Webhooks
   - Agent Skills
+  - Open-Source
 apis:
   - aid: erxes:graphql-api
     name: Erxes GraphQL API
