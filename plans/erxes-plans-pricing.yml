@@ -121,3 +121,45 @@ gaps:
     No monetary amount is published for any paid tier. A buyer cannot compare
     erxes on price without contacting sales, and neither can an agent.
   - 'No annual-vs-monthly pricing is shown, and no per-seat rate is stated.'
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - free
+  - negotiated
+  units: []
+  plans:
+  - name: Free
+    access: other
+    model: free
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Business
+    access: other
+    model: negotiated
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Messenger
+    access: other
+    model: negotiated
+    model_how: derived
+    units: []
+    periods:
+    - month
+  - name: Community Edition (self-hosted)
+    access: other
+    model: free
+    model_how: derived
+    units: []
+    periods:
+    - one-time
+  - name: Enterprise Edition
+    access: other
+    model: negotiated
+    model_how: derived
+    units: []
+    periods: []
