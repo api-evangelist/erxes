@@ -64,48 +64,135 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-API Evangelist catalog entry for Erxes — the open-source Experience Operating System (XOS) that unifies marketing, sales, operations, and customer support on a single AI-native platform.
+Open-source Experience Operating System (XOS) that unifies marketing, sales, operations and support in one self-hostable platform, positioned as a replacement for HubSpot, Zendesk, Linear and Wix. The machine surface is a GraphQL Federation API served by an Apollo Router gateway — there is no REST API and no OpenAPI — covering contacts, companies, products, tags, documents, brands, organization structure, team members and automations in the core subgraph, plus sales, frontline (inbox/tickets), operation (projects/tasks/cycles) and block plugin subgraphs. Authentication is OAuth 2.0 Device Authorization Grant with per-tenant clients and a documented 34-scope vocabulary. erxes ships the Community Edition under AGPL-3.0 alongside a proprietary Enterprise Edition, publishes its own agent plugin and agent skills, and releases roughly once per merge day.
 
-## About Erxes
+**Areas:** GraphQL · CRM · Customer Experience · Open Source · Marketing Automation · Sales Pipeline · Help Desk · Ticketing · Team Inbox · Self-Hosted · Apollo Federation · Project Management
 
-Erxes is a source-available experience management platform built on a GraphQL Federation architecture. It serves as an open-source alternative to HubSpot, Zendesk, Linear, and similar SaaS tools, trusted by over 25,000 organizations. The platform is built with Node.js, TypeScript, MongoDB, Redis, and Apollo Server, exposing a GraphQL API for all core CRM and operational functions.
+## Erxes on APIs.io
 
-- **Website:** https://erxes.io
-- **Documentation:** https://erxes.io/docs/introduction
-- **GitHub Organization:** https://github.com/erxes
-- **LinkedIn:** https://www.linkedin.com/company/erxes
-- **Pricing:** https://erxes.io/pricing/self-service/frontline
+Everything profiled for Erxes is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/erxes/](https://apis.io/providers/erxes/)** — or go straight to one of the APIs or properties below.
 
-## API
+### APIs (1)
 
-Erxes exposes a GraphQL Federation API through an Apollo Router gateway (port 4000 in self-hosted deployments). The API covers:
+- [Erxes GraphQL API](https://apis.io/apis/erxes/graphql-api/) — GraphQL Federation API powering the erxes XOS platform. An Apollo Router gateway federates one subgraph per plugin — core (contacts, companies, products,…
 
-- Contacts and companies (CRM)
-- Conversations and team inboxes
-- Tickets, tasks, and deals
-- Sales pipelines
-- Marketing automation workflows
-- Knowledge base and portals
+### Published properties
 
-## Repository Structure
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
 
-```
-erxes/
-├── apis.yml                          # APIs.json 0.19 catalog entry
-├── plans/
-│   └── erxes-plans.md               # Pricing plan details
-├── rate-limits/
-│   └── erxes-rate-limits.md         # Rate limit documentation
-├── finops/
-│   └── erxes-finops.md              # Financial operations guidance
-└── README.md
-```
+#### AsyncAPI (1)
 
-## Licensing
+Event-driven and webhook contracts.
 
-- **Community Edition:** AGPLv3 (open source, self-hostable)
-- **Enterprise Edition:** Proprietary license with additional features and support
+- [Erxes Webhooks](https://apis.io/asyncapis/erxes/erxes-webhooks/)
 
-## Maintainer
+#### GraphQL (1)
 
-Kin Lane — kin@apievangelist.com
+GraphQL schemas.
+
+- [Erxes GraphQL API](https://apis.io/graphqls/erxes/erxes-graphql/)
+
+#### MCP servers (1)
+
+Model Context Protocol servers that expose the API to agents.
+
+- [erxes](https://apis.io/servers/erxes/erxes/)
+
+#### Security (3)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Erxes Authentication](https://apis.io/security/erxes/erxes-authentication/)
+- [Erxes Domain Security](https://apis.io/security/erxes/erxes-domain-security/)
+- [Erxes Vulnerability Disclosure](https://apis.io/security/erxes/erxes-vulnerability-disclosure/)
+
+#### OAuth scopes (1)
+
+The permissions the API asks for.
+
+- [Erxes Scopes](https://apis.io/scopes/erxes/erxes-scopes/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Erxes Plans Pricing](https://apis.io/plans/erxes/erxes-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Erxes Rate Limits](https://apis.io/rate-limits/erxes/erxes-rate-limits/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://erxes.io)
+- [Documentation](https://erxes.io/docs/introduction)
+- [Getting started](https://docs.erxes.io/self-hosting)
+- [API reference](https://github.com/erxes/erxes-skills/blob/main/agent-plugin/erxes-next/erxes-graphql-api.md)
+- [Pricing](https://erxes.io/pricing/self-service/frontline)
+- [Sign up](https://erxes.io/auth/signup)
+- [Support](https://erxes.io/discussions)
+- [Blog](https://erxes.io/blogs)
+- [Security](https://github.com/erxes/erxes/blob/main/SECURITY.md)
+- [Terms of service](https://erxes.io/legal/terms)
+- [Privacy policy](https://erxes.io/legal/privacy)
+- [GitHub](https://github.com/erxes)
+- [Status](https://status.erxes.io)
+
+## API Evangelist rating
+
+**Kin Score 65.7** — strong · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 80.4 |
+| Contract quality | 46.9 |
+| Contract governance | 4.5 |
+| Operational transparency | 81.6 |
+| Developer ergonomics | 78.6 |
+| Access clarity | 76.3 |
+
+**Agent readiness 28.8** — agent-ready
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | — |
+| Reversibility Documented | — |
+| MCP Server | — |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | — |
+| Error Semantics | documented (partial credit) |
+| OpenAPI Examples | — |
+| Rate Limit Signal | documented (partial credit) |
+| Event Surface Described | yes |
+| Agent Skills | yes |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+| Pagination Ratio | na |
+| Operation Distinctiveness | na |
+
+**Regulatory alignment 40.2** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/erxes/](https://apis.io/providers/erxes/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Erxes: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/erxes/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
